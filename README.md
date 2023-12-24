@@ -5,6 +5,9 @@ This script facilitates the integration of text-to-speech (TTS) using Google's T
 
 **Note**: The code is dirty and not well-organized. It was written for personal use and is not intended to be a polished, production-ready script. However, it is functional and can be used as a starting point for a more robust script.
 
+## Data
+A curateed ANKI .apkg deck is inside `data/anki` folder. It contains around 900 common adjectives, nouns, and verbs in French.
+
 ## Features
 - **Deck Export**: Export Anki decks to a text file to then generate audio files.
 - **Text-to-Speech Integration**: Generate audio files from text using Google TTS and link them with Anki flashcards.
