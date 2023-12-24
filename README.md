@@ -35,7 +35,9 @@ Set up the necessary environment variables in a `.env` file or your environment:
 
 ## Usage
 
-The script can be run from the command line with different subcommands:
+The script can be run from the command line with different subcommands.
+
+To get help on the different subcommands:
 ```bash
 python main.py -h
 ```
@@ -53,6 +55,11 @@ python main.py export --deck DECK_NAME \
 ```
 
 ### Generate Audio Files
+To get help on generating audio files:
+```bash
+python main.py export -h
+```
+
 For text file input:
 ```bash
 python main.py generate --file INPUT_FILE \
@@ -74,6 +81,11 @@ python main.py generate --file INPUT_FILE \
 ```
 
 ### Import to Anki
+To get help on importing decks:
+```bash
+python main.py import -h
+```
+
 To import a deck to Anki:
 ```bash
 python main.py import --file INPUT_FILE \
