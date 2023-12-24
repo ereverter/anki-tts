@@ -1,0 +1,15 @@
+{
+    "basic": {
+        "fields": [
+            "front",
+            "back"
+        ]
+    },
+    "advanced": {
+        "fields": [
+            "front",
+            "back",
+            "audio"
+        ]
+    }
+}
