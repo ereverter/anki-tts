@@ -1,8 +1,9 @@
 """
 Script containing the logger setup.
 """
-import os
+
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 
 

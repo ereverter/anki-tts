@@ -1,10 +1,14 @@
 """
 Script to create the Anki connection.
 """
-import os
-import requests
+
 import json
+import os
+from typing import Any, Dict, List
+
+import requests
 from dotenv import load_dotenv
+
 from ..utils import setup_logger
 
 # Configure logging
@@ -34,20 +38,22 @@ class AnkiConnection:
         invoke(action, **params): Sends a request to AnkiConnect and handles the response.
     """
 
-    def __init__(self, url=ANKI_CONNECT_URL, api_version=API_VERSION):
+    def __init__(
+        self, url: str = ANKI_CONNECT_URL, api_version: str = API_VERSION
+    ) -> None:
         self.url = url
         self.api_version = api_version
 
-    def __call__(self, action, **params):
+    def __call__(self, action: str, **params) -> Any:
         return self.invoke(action, **params)
 
-    def list_decks(self):
+    def list_decks(self) -> List[str]:
         return self.invoke("deckNames")
 
-    def request(self, action, **params):
+    def request(self, action: str, **params) -> Dict:
         return {"action": action, "params": params, "version": self.api_version}
 
-    def invoke(self, action, **params):
+    def invoke(self, action: str, **params) -> Any:
         requestJson = json.dumps(self.request(action, **params)).encode("utf-8")
         try:
             response = requests.post(self.url, requestJson, timeout=10).json()

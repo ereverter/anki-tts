@@ -1,10 +1,15 @@
 """
 Script to import and export data from Anki.
 """
-from tqdm import tqdm
+
 import json
-from .connection import AnkiConnection
+from typing import Any, Dict, List
+
+from domain import Card, Deck
+from tqdm import tqdm
+
 from ..utils import setup_logger
+from .connect import AnkiConnection
 
 # Configure logging
 logger = setup_logger(name=__name__)
@@ -31,18 +36,18 @@ class AnkiImporterExporter:
         _update_note_audio(note_id, audio_path): Helper method to update the audio path of a flashcard note.
     """
 
-    def __init__(self, anki_connection=None):
+    def __init__(self, anki_connection: AnkiConnection = None) -> None:
         if anki_connection is None:
             self.anki_connection = AnkiConnection()
         else:
             self.anki_connection = anki_connection
 
-    def load_card_types(self, json_file_path):
+    def load_card_types(self, json_file_path: str) -> Dict:
         with open(json_file_path, "r") as file:
             return json.load(file)
 
     # Export
-    def export_to_txt(self, deck_name, output_file):
+    def export_to_txt(self, deck_name: str, output_file: str) -> None:
         note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
         notes = self.anki_connection("notesInfo", notes=note_ids)
 
@@ -61,7 +66,9 @@ class AnkiImporterExporter:
                 file.write(line)
 
     # Import
-    def import_and_update_notes(self, input_file, deck_name, model_name="Advanced"):
+    def import_and_update_notes(
+        self, input_file: str, deck_name: str, model_name: str = "Advanced"
+    ) -> None:
         card_types = self.load_card_types("card_types.json")
         self._update_existing_notes(
             input_file, deck_name, card_types[model_name.lower()]["fields"]
@@ -70,7 +77,9 @@ class AnkiImporterExporter:
             input_file, deck_name, model_name, card_types[model_name.lower()]["fields"]
         )
 
-    def _add_new_notes(self, input_file, deck_name, model_name, fields):
+    def _add_new_notes(
+        self, input_file: str, deck_name: str, model_name: str, fields: List[str]
+    ) -> None:
         logger.info(f"Adding new notes to {deck_name} from {input_file}")
         with open(input_file, "r", encoding="utf-8") as file:
             lines = file.readlines()
@@ -89,7 +98,9 @@ class AnkiImporterExporter:
             self.anki_connection("addNotes", notes=new_notes)
             logger.info(f"{len(new_notes)} new notes added to {deck_name}")
 
-    def _update_existing_notes(self, input_file, deck_name, fields):
+    def _update_existing_notes(
+        self, input_file: str, deck_name: str, fields: List[str]
+    ):
         logger.info(f"Updating {deck_name} with {input_file}")
         with open(input_file, "r", encoding="utf-8") as file:
             lines = file.readlines()
@@ -112,7 +123,7 @@ class AnkiImporterExporter:
 
         logger.info(f"{updated_count} existing notes updated in {deck_name}")
 
-    def _build_note(self, deck_name, model_name, **fields):
+    def _build_note(self, deck_name: str, model_name: str, **fields) -> Card:
         return {
             "deckName": deck_name,
             "modelName": model_name,
@@ -121,7 +132,7 @@ class AnkiImporterExporter:
             "tags": [],
         }
 
-    def _update_note_fields(self, note_id, **fields):
+    def _update_note_fields(self, note_id: str, **fields):
         note = self.anki_connection("notesInfo", notes=[note_id])[0]
         updated_fields = {
             field: fields.get(field, note["fields"][field]["value"])

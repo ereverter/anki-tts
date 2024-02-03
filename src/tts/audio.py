@@ -1,12 +1,15 @@
 """
 Script for generating audio files from text using Google Text-to-Speech (gTTS).
 """
+
 import os
 import re
+from pathlib import Path
+
+from dotenv import load_dotenv
 from gtts import gTTS
 from tqdm import tqdm
-from dotenv import load_dotenv
-from pathlib import Path
+
 from ..utils import setup_logger
 
 # Configure logging

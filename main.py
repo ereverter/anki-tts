@@ -1,12 +1,15 @@
 """
 Script to integrate text to audio using Google TTS with Anki or export Anki decks.
 """
+
 import argparse
 import os
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 from dotenv import load_dotenv
-from src.anki.connection import AnkiConnection
+
+from src.anki.connect import AnkiConnection
 from src.anki.port import AnkiImporterExporter
 from src.tts.audio import AudioGenerator
 from src.utils import setup_logger
