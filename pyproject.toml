@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "manki"
+version = "v0.0.1"
+description = ""
+authors = []
+readme = "README.md"
+packages = [{ include = "manki", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beautifulsoup4 = "^4.12"
+gTTS = "^2.4"
+pandas = "^2.1"
+python-dotenv = "^1.0"
+requests = "^2.31"
+tqdm = "^4.66"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.3"
+pylint = "^3.1"
+flake8 = "^7.0"
+ipykernel = "^6.29.4"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.23.5"
+pytest-snapshot = "^0.9.0"
+mypy = "^1.8.0"
+expects = "^0.9.0"
+
+[tool.pytest.ini_options]
+testpaths = ["./tests"]

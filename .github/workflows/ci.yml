@@ -1,37 +1,62 @@
-name: Python CI
+# name: manki
 
-on:
-  push:
-    branches: [ main, dev ]
-  pull_request:
-    branches: [ main, dev ]
+# on:
+#   workflow_dispatch: {}
+#   pull_request:
+#     branches:
+#       - "*"
+#     types:
+#       - opened
+#       - reopened
+#       - synchronize
+#       - ready_for_review 
+#     paths:
+#       - '.github/workflows/saas.yml'
+#       - 'saas/src/**'
+#       - 'saas/test/**' 
+      
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+#   cancel-in-progress: true
+      
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         python-version: ["3.10", "3.11", "3.12"]
+        
+#     steps:
+#       - uses: actions/checkout@v4
+      
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: ${{ matrix.python-version }}
 
-jobs:
-  build:
+#       - name: Install Poetry
+#         run: pip install poetry
 
-    runs-on: ubuntu-latest
+#       - name: Cache Poetry dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: |
+#             ~/.cache/pypoetry
+#           key: ${{ runner.os }}-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-poetry-${{ matrix.python-version }}-
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
+#       - name: Install dependencies with Poetry
+#         run: poetry install --with manki --with test --without dev
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install black isort mypy
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#       - name: Lint with flake8
+#         run: poetry run flake8 manki --count --select=E9,F63,F7,F82 --show-source --statistics
 
-    - name: Check Black formatting
-      run: |
-        black --check .
+#       - name: Run tests with Poetry
+#         run: poetry run pytest test --junitxml=report.xml -v -s
 
-    - name: Check import order with isort
-      run: |
-        isort --check-only .
-
-    - name: Check typing with mypy
-      run: |
-        mypy src
+#       - name: Upload test report 📁
+#         uses: actions/upload-artifact@v3
+#         with:
+#           path: report.xml
+#           name: pytest-report
