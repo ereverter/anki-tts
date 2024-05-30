@@ -1,5 +1,7 @@
 # Anki TTS Integration and Deck Export
 
+about to update
+
 ## Overview
 This script facilitates the integration of text-to-speech (TTS) using Google's Text-to-Speech service with Anki flashcards and also provides functionality to export Anki decks. It is particularly useful for language learners who wish to add audio to their Anki cards or for those who need to export their Anki decks for backup or sharing purposes.
 
