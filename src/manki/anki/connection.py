@@ -38,9 +38,12 @@ class AnkiConnection:
         invoke(action, **params): Sends a request to AnkiConnect and handles the response.
     """
 
-    def __init__(self, url=ANKI_CONNECT_URL, api_version=ANKI_API_VERSION):
+    def __init__(
+        self, url=ANKI_CONNECT_URL, api_version=ANKI_API_VERSION, api_key=ANKI_API_KEY
+    ):
         self.url = url
         self.api_version = api_version
+        self.api_key = api_key
 
     def __call__(self, action, **params):
         return self.invoke(action, **params)
@@ -53,7 +56,7 @@ class AnkiConnection:
             "action": action,
             "params": params,
             "version": self.api_version,
-            "key": ANKI_API_KEY,
+            "key": self.api_key,
         }
 
     def invoke(self, action, **params):
