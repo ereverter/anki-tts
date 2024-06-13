@@ -62,33 +62,19 @@ class AnkiImporterExporter:
                 file.write(line)
 
     # Import
-    def import_and_update_notes(self, input_file, deck_name, model_name="Advanced"):
-        card_types = self.load_card_types("card_types.json")
-        self._update_existing_notes(
-            input_file, deck_name, card_types[model_name.lower()]["fields"]
-        )
-        self._add_new_notes(
-            input_file, deck_name, model_name, card_types[model_name.lower()]["fields"]
-        )
+    def import_and_update_notes(
+        self, input_file: str, deck_name: str, model_name: str = "Base"
+    ) -> None:
+        note_type = NoteType(model_name)
+        note_fields = NoteTypeFields.get_fields(note_type)
 
-    def _add_new_notes(self, input_file, deck_name, model_name, fields):
-        logger.info(f"Adding new notes to {deck_name} from {input_file}")
-        with open(input_file, "r", encoding="utf-8") as file:
-            lines = file.readlines()
+        if input_file.endswith(".csv"):
+            anki_notes = self._get_anki_notes_from_csv(input_file, deck_name, note_type)
+        else:
+            raise Exception("Only .csv input files are accepted")
 
-        new_notes = []
-        for line in tqdm(lines, total=len(lines), desc="Adding new notes"):
-            note_data = line.strip().split("\t")
-            note_fields = dict(zip(fields, note_data))
-
-            # Only build the new note without querying
-            new_note = self._build_note(deck_name, model_name, **note_fields)
-            new_notes.append(new_note)
-
-        # Add all new notes in one request
-        if new_notes:
-            self.anki_connection("addNotes", notes=new_notes)
-            logger.info(f"{len(new_notes)} new notes added to {deck_name}")
+        self._update_anki_notes(anki_notes)
+        self._add_anki_notes(anki_notes)
 
     def _add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
         anki_notes_dict = [note.to_anki_dict() for note in anki_notes]
@@ -115,43 +101,65 @@ class AnkiImporterExporter:
 
         return anki_notes
 
-    def _update_existing_notes(self, input_file, deck_name, fields):
-        logger.info(f"Updating {deck_name} with {input_file}")
-        with open(input_file, "r", encoding="utf-8") as file:
-            lines = file.readlines()
+    def _build_query_find_note(self, anki_note: AnkiNote) -> str:
+        query_components = [
+            f'{field}:"{getattr(anki_note, field)}"'
+            for field in anki_note.__fields__.keys()
+            if getattr(anki_note, field) and field not in {"audio", "image", "do_write"}
+        ]
+        return f"deck:{anki_note.deckName} " + " ".join(query_components)
 
+    def _fetch_note_ids(self, query: str) -> List[int]:
+        return self.anki_connection("findNotes", query=query)
+
+    def _fetch_existing_note(self, note_id: int) -> Dict:
+        notes = self.anki_connection("notesInfo", notes=[note_id])
+        return notes[0] if notes else {}
+
+    def _check_for_changes(self, anki_note: AnkiNote, existing_note: Dict) -> bool:
+        changes = False
+        for field in existing_note["fields"]:
+            new_value = getattr(anki_note, field, None)
+            if (
+                new_value is not None
+                and new_value != existing_note["fields"][field]["value"]
+            ):
+                changes = True
+                break
+        return changes
+
+    def _prepare_updated_fields(self, anki_note: AnkiNote, existing_note: Dict) -> Dict:
+        updated_fields = {}
+        for field in existing_note["fields"]:
+            updated_fields[field] = getattr(
+                anki_note, field, existing_note["fields"][field]["value"]
+            )
+
+        if anki_note.audio:
+            updated_fields["audio"] = anki_note.audio
+        if anki_note.image:
+            updated_fields["image"] = anki_note.image
+        return updated_fields
+
+    def _update_anki_notes(self, anki_notes: List[AnkiNoteModel]) -> None:
         updated_count = 0
-        for line in tqdm(lines, total=len(lines), desc="Updating notes"):
-            note_data = line.strip().split("\t")
-            note_fields = dict(zip(fields, note_data))
-            query_components = [
-                f'{field}:"{value}"'
-                for field, value in note_fields.items()
-                if value and field != "audio"
-            ]
-            query = f"deck:{deck_name} " + " ".join(query_components)
-            note_ids = self.anki_connection("findNotes", query=query)
+
+        for anki_note in tqdm(anki_notes, desc="Updating notes"):
+            query = self._build_query(anki_note)
+            note_ids = self._fetch_note_ids(query)
 
             if note_ids:
-                self._update_note_fields(note_ids[0], **note_fields)
-                updated_count += 1
+                note_id = note_ids[0]
+                existing_note = self._fetch_existing_note(note_id)
 
-        logger.info(f"{updated_count} existing notes updated in {deck_name}")
+                changes = self._check_for_changes(anki_note, existing_note)
 
-    def _build_note(self, deck_name, model_name, **fields):
-        return {
-            "deckName": deck_name,
-            "modelName": model_name,
-            "fields": fields,
-            "options": {"allowDuplicate": False},
-            "tags": [],
-        }
+                if changes or anki_note.do_write:
+                    updated_fields = self._prepare_updated_fields(
+                        anki_note, existing_note
+                    )
+                    updated_note = {"id": note_id, "fields": updated_fields}
+                    self.anki_connection("updateNoteFields", note=updated_note)
+                    updated_count += 1
 
-    def _update_note_fields(self, note_id, **fields):
-        note = self.anki_connection("notesInfo", notes=[note_id])[0]
-        updated_fields = {
-            field: fields.get(field, note["fields"][field]["value"])
-            for field in note["fields"]
-        }
-        updated_note = {"id": note_id, "fields": updated_fields}
-        self.anki_connection("updateNoteFields", note=updated_note)
+        logger.info(f"{updated_count} notes updated")
