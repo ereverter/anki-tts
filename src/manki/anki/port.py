@@ -1,10 +1,16 @@
 """
 Script to import and export data from Anki.
 """
-from tqdm import tqdm
+
+import csv
 import json
-from .connection import AnkiConnection
+from typing import Dict, List
+
+from tqdm import tqdm
+
 from ..utils import setup_logger
+from .connection import AnkiConnection
+from .domain import AnkiNote, NoteType, NoteTypeFields
 
 # Configure logging
 logger = setup_logger(name=__name__)
@@ -31,24 +37,19 @@ class AnkiImporterExporter:
         _update_note_audio(note_id, audio_path): Helper method to update the audio path of a flashcard note.
     """
 
-    def __init__(self, anki_connection=None):
+    def __init__(self, anki_connection: AnkiConnection = None) -> None:
         if anki_connection is None:
             self.anki_connection = AnkiConnection()
         else:
             self.anki_connection = anki_connection
 
-    def load_card_types(self, json_file_path):
-        with open(json_file_path, "r") as file:
-            return json.load(file)
-
     # Export
-    def export_to_txt(self, deck_name, output_file):
+    def export_to_txt(self, deck_name: str, output_file: str) -> None:
         note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
         notes = self.anki_connection("notesInfo", notes=note_ids)
 
         logger.info(f"Exporting {len(notes)} notes to {output_file}")
 
-        # Check if the output folder exists
         output_folder = output_file.parent
         if not output_folder.exists():
             output_folder.mkdir(parents=True)
@@ -88,6 +89,31 @@ class AnkiImporterExporter:
         if new_notes:
             self.anki_connection("addNotes", notes=new_notes)
             logger.info(f"{len(new_notes)} new notes added to {deck_name}")
+
+    def _add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
+        anki_notes_dict = [note.to_anki_dict() for note in anki_notes]
+        self.anki_connection("addNotes", notes=anki_notes_dict)
+        logger.info(f"{len(anki_notes_dict)} new notes added")
+
+    def _get_anki_notes_from_csv(
+        self, input_file: str, deck_name: str, note_type: NoteType
+    ) -> List[AnkiNote]:
+        logger.info(f"Fetching notes from {input_file}")
+
+        fields = NoteTypeFields.get_fields(note_type)
+
+        anki_notes = []
+        with open(input_file, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file, fieldnames=fields)
+            for row in tqdm(reader, desc="Adding new notes"):
+                note_data = {field: row[field] for field in fields if field in row}
+                anki_note = AnkiNote(
+                    deckName=deck_name, modelName=note_type.value, **note_data
+                )
+
+                anki_notes.append(anki_note)
+
+        return anki_notes
 
     def _update_existing_notes(self, input_file, deck_name, fields):
         logger.info(f"Updating {deck_name} with {input_file}")
