@@ -6,7 +6,6 @@ import pytest
 from manki.anki.port import AnkiConnection
 
 
-# Fixture to create an AnkiConnection instance
 @pytest.fixture(scope="session")
 def anki_connection():
     return AnkiConnection(url="http://localhost:8765", api_version=6, api_key="apikey")

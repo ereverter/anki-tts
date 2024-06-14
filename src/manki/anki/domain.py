@@ -11,8 +11,8 @@ class AnkiNote(BaseModel):
     back: str
     audio: Optional[str] = None
     image: Optional[str] = None
-    do_write: bool = False
-    tags: List[str] = []
+    do_write: Optional[bool] = False
+    tags: Optional[List[str]] = []
     id: Optional[int] = None
 
     def to_anki_dict(self) -> Dict:

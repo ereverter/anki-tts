@@ -1,8 +1,6 @@
-"""
-Script to import and export data from Anki.
-"""
-
 import csv
+import os
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from tqdm import tqdm
@@ -11,7 +9,6 @@ from ..utils import setup_logger
 from .connection import AnkiConnection
 from .domain import AnkiNote, NoteType, NoteTypeFields
 
-# Configure logging
 logger = setup_logger(name=__name__)
 
 
@@ -46,6 +43,7 @@ class AnkiImporterExporter:
     def export_to_txt(self, deck_name: str, output_file: str) -> None:
         note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
         notes = self.anki_connection("notesInfo", notes=note_ids)
+        output_file = Path(output_file)
 
         logger.info(f"Exporting {len(notes)} notes to {output_file}")
 
@@ -53,11 +51,13 @@ class AnkiImporterExporter:
         if not output_folder.exists():
             output_folder.mkdir(parents=True)
 
-        if not output_file.endswith(".txt"):
+        if not str(output_file).endswith(".txt"):
             raise Exception("Can only export to .txt")
 
         with open(output_file, "w", encoding="utf-8") as file:
+            print(notes)
             for note in tqdm(notes, total=len(notes), desc="Exporting notes"):
+                print("Notes", notes)
                 fields = note["fields"]
                 line_elements = [fields[field]["value"] for field in fields]
                 line = "\t".join(line_elements) + "\n"
