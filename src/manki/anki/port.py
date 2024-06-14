@@ -24,13 +24,10 @@ class AnkiImporterExporter:
         anki_connection (AnkiConnection): An instance of the AnkiConnection class to interact with AnkiConnect.
 
     Methods:
-        load_card_types(json_file_path): Load card type configurations from a JSON file.
         export_to_txt(deck_name, output_file): Export flashcards from a specified Anki deck to a text file.
         import_and_update_notes(input_file, deck_name, model_name): Import flashcards from a file into Anki and update existing notes.
-        _add_new_notes(input_file, deck_name, model_name): Add new flashcards to Anki from a file. Fast and efficient.
-        _update_existing_notes(input_file, deck_name): Update existing flashcards in Anki from a file. Slow and inefficient.
-        _build_note(deck_name, model_name, front, back, audio_path): Helper method to construct a flashcard note.
-        _update_note_audio(note_id, audio_path): Helper method to update the audio path of a flashcard note.
+        add_anki_notes(anki_notes): Add new flashcards to Anki.
+        update_anki_notes(anki_notes, reference_fields, changing_fields): Update existing flashcards in Anki.
     """
 
     def __init__(self, anki_connection: AnkiConnection = None) -> None:
@@ -41,8 +38,7 @@ class AnkiImporterExporter:
 
     # export
     def export_to_txt(self, deck_name: str, output_file: str) -> None:
-        note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
-        notes = self.anki_connection("notesInfo", notes=note_ids)
+        notes = self._fetch_all_notes(deck_name)
         output_file = Path(output_file)
 
         logger.info(f"Exporting {len(notes)} notes to {output_file}")
@@ -62,6 +58,12 @@ class AnkiImporterExporter:
                 line_elements = [fields[field]["value"] for field in fields]
                 line = "\t".join(line_elements) + "\n"
                 file.write(line)
+
+    def _fetch_all_notes(self, deck_name: str):
+        note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
+        notes = self.anki_connection("notesInfo", notes=note_ids)
+
+        return notes
 
     # import
     def import_and_update_notes(
@@ -117,13 +119,14 @@ class AnkiImporterExporter:
         changing_fields: Optional[List[str]] = None,
     ) -> None:
         updated_count = 0
+        deck_name = anki_notes[0].deckName
 
         for anki_note in tqdm(anki_notes, desc="Updating notes"):
             matching_notes = self._find_notes_like(anki_note, reference_fields)
 
             if matching_notes:
                 note_id = matching_notes[0]
-                existing_note = self._get_note(note_id)
+                existing_note = self._get_note(note_id, deck_name)
 
                 if self._update_note(
                     new_note=anki_note,
@@ -133,6 +136,7 @@ class AnkiImporterExporter:
                     updated_count += 1
 
         logger.info(f"{updated_count} notes updated")
+        return updated_count
 
     def _update_note(
         self,
@@ -170,16 +174,15 @@ class AnkiImporterExporter:
         query = f"deck:{note.deckName} {field_filter}"
         return self.anki_connection("findNotes", query=query)
 
-    def _get_note(self, note_id: int) -> AnkiNote:
+    def _get_note(self, note_id: int, deck_name: str) -> AnkiNote:
         notes = self.anki_connection("notesInfo", notes=[note_id])
         if not notes:
             return None
 
         note_info = notes[0]
         fields = note_info["fields"]
-
         return AnkiNote(
-            deckName=note_info["deckName"],
+            deckName=deck_name,
             modelName=note_info["modelName"],
             front=fields["Front"]["value"],
             back=fields["Back"]["value"],

@@ -6,6 +6,7 @@ import requests_mock
 from tqdm import tqdm
 
 from manki.anki.connection import AnkiConnection
+from manki.anki.domain import AnkiNote
 from manki.anki.port import AnkiImporterExporter
 
 
@@ -44,16 +45,22 @@ def mock_notes_info_response(requests_mocker):
         json={
             "result": [
                 {
+                    "noteID": 1,
+                    "modelName": "Basic",
+                    "tags": ["tag1"],
                     "fields": {
-                        "Front": {"value": "Front1"},
-                        "Back": {"value": "Back1"},
-                    }
+                        "Front": {"value": "front1"},
+                        "Back": {"value": "back1"},
+                    },
                 },
                 {
+                    "noteID": 2,
+                    "modelName": "Basic",
+                    "tags": ["tag1"],
                     "fields": {
-                        "Front": {"value": "Front2"},
-                        "Back": {"value": "Back2"},
-                    }
+                        "Front": {"value": "front2"},
+                        "Back": {"value": "back2"},
+                    },
                 },
             ],
             "error": None,
@@ -65,9 +72,19 @@ def mock_notes_info_response(requests_mocker):
 def mock_add_notes_response(requests_mocker):
     requests_mocker.post(
         "http://localhost:8765",
+        json={"result": None, "error": None},
         additional_matcher=lambda request: json.loads(request.text)["action"]
-        == "findNotes",
-        json={"result": [1, 2, 3], "error": None},
+        == "addNotes",
+    )
+
+
+@pytest.fixture
+def mock_update_notes_response(requests_mocker):
+    requests_mocker.post(
+        "http://localhost:8765",
+        json={"result": None, "error": None},
+        additional_matcher=lambda request: json.loads(request.text)["action"]
+        == "updateNoteFields",
     )
 
 
@@ -91,12 +108,52 @@ class TestAnkiImporterExporter:
         with open(output_file, "r", encoding="utf-8") as file:
             content = file.readlines()
             assert content == [
-                "Front1\tBack1\n",
-                "Front2\tBack2\n",
+                "front1\tback1\n",
+                "front2\tback2\n",
             ]
 
-    def test_add_anki_notes(self):
-        pass
+    def test_add_anki_notes(self, anki_importer_exporter, mock_add_notes_response):
+        # arrange
+        anki_notes = self._create_anki_notes()
 
-    def test_update_anki_notes(self):
-        pass
+        # act
+        anki_importer_exporter.add_anki_notes(anki_notes)
+
+        # assert
+        assert len(anki_notes) == 2
+
+    def test_update_anki_notes(
+        self,
+        anki_importer_exporter,
+        mock_find_notes_response,
+        mock_notes_info_response,
+        mock_update_notes_response,
+    ):
+        # arrange
+        anki_notes = self._create_anki_notes()
+
+        # act
+        updated_count = anki_importer_exporter.update_anki_notes(
+            anki_notes, reference_fields=["front"], changing_fields=["back"]
+        )
+
+        # assert
+        assert updated_count == 1
+
+    def _create_anki_notes(self):
+        return [
+            AnkiNote(
+                deckName="current",
+                modelName="Base",
+                front="front1",
+                back="back1",
+                tags=["tag1"],
+            ),
+            AnkiNote(
+                deckName="current",
+                modelName="Base",
+                front="front2",
+                back="back2",
+                tags=["tag1"],
+            ),
+        ]
