@@ -12,9 +12,9 @@ beautifulsoup4 = "^4.12"
 gTTS = "^2.4"
 pandas = "^2.1"
 python-dotenv = "^1.0"
-requests = "^2.31"
-tqdm = "^4.66"
 requests-mock = "^1.12.1"
+requests = "^2.32.3"
+tqdm = "^4.66.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3"
