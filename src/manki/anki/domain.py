@@ -13,23 +13,29 @@ class AnkiNote(BaseModel):
     image: Optional[str] = None
     do_write: bool = False
     tags: List[str] = []
+    id: Optional[int] = None
 
     def to_anki_dict(self) -> Dict:
         anki_note_dict = {
             "deckName": self.deckName,
             "modelName": self.modelName,
-            "fields": {"front": self.front, "back": self.back},
+            "fields": self.get_fields(),
             "options": {"allowDuplicate": False},
             "tags": [],
         }
 
+        return anki_note_dict
+
+    def get_fields(self) -> Dict:
+        fields = {"front": self.front, "back": self.back}
+
         if self.image is not None:
-            anki_note_dict["fields"].update({"image": self.image})
+            fields.update({"image": self.image})
 
         if self.audio is not None:
-            anki_note_dict["fields"].update({"audio": self.audio})
+            fields.update({"audio": self.audio})
 
-        return anki_note_dict
+        return fields
 
 
 class NoteType(Enum):

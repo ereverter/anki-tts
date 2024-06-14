@@ -3,8 +3,7 @@ Script to import and export data from Anki.
 """
 
 import csv
-import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from tqdm import tqdm
 
@@ -43,7 +42,7 @@ class AnkiImporterExporter:
         else:
             self.anki_connection = anki_connection
 
-    # Export
+    # export
     def export_to_txt(self, deck_name: str, output_file: str) -> None:
         note_ids = self.anki_connection("findNotes", query=f"deck:{deck_name}")
         notes = self.anki_connection("notesInfo", notes=note_ids)
@@ -54,6 +53,9 @@ class AnkiImporterExporter:
         if not output_folder.exists():
             output_folder.mkdir(parents=True)
 
+        if not output_file.endswith(".txt"):
+            raise Exception("Can only export to .txt")
+
         with open(output_file, "w", encoding="utf-8") as file:
             for note in tqdm(notes, total=len(notes), desc="Exporting notes"):
                 fields = note["fields"]
@@ -61,7 +63,7 @@ class AnkiImporterExporter:
                 line = "\t".join(line_elements) + "\n"
                 file.write(line)
 
-    # Import
+    # import
     def import_and_update_notes(
         self, input_file: str, deck_name: str, model_name: str = "Base"
     ) -> None:
@@ -73,10 +75,11 @@ class AnkiImporterExporter:
         else:
             raise Exception("Only .csv input files are accepted")
 
-        self._update_anki_notes(anki_notes)
-        self._add_anki_notes(anki_notes)
+        self.update_anki_notes(anki_notes)
+        self.add_anki_notes(anki_notes)
 
-    def _add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
+    ## add
+    def add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
         anki_notes_dict = [note.to_anki_dict() for note in anki_notes]
         self.anki_connection("addNotes", notes=anki_notes_dict)
         logger.info(f"{len(anki_notes_dict)} new notes added")
@@ -101,65 +104,84 @@ class AnkiImporterExporter:
 
         return anki_notes
 
-    def _build_query_find_note(self, anki_note: AnkiNote) -> str:
-        query_components = [
-            f'{field}:"{getattr(anki_note, field)}"'
-            for field in anki_note.__fields__.keys()
-            if getattr(anki_note, field) and field not in {"audio", "image", "do_write"}
-        ]
-        return f"deck:{anki_note.deckName} " + " ".join(query_components)
-
-    def _fetch_note_ids(self, query: str) -> List[int]:
-        return self.anki_connection("findNotes", query=query)
-
-    def _fetch_existing_note(self, note_id: int) -> Dict:
-        notes = self.anki_connection("notesInfo", notes=[note_id])
-        return notes[0] if notes else {}
-
-    def _check_for_changes(self, anki_note: AnkiNote, existing_note: Dict) -> bool:
-        changes = False
-        for field in existing_note["fields"]:
-            new_value = getattr(anki_note, field, None)
-            if (
-                new_value is not None
-                and new_value != existing_note["fields"][field]["value"]
-            ):
-                changes = True
-                break
-        return changes
-
-    def _prepare_updated_fields(self, anki_note: AnkiNote, existing_note: Dict) -> Dict:
-        updated_fields = {}
-        for field in existing_note["fields"]:
-            updated_fields[field] = getattr(
-                anki_note, field, existing_note["fields"][field]["value"]
-            )
-
-        if anki_note.audio:
-            updated_fields["audio"] = anki_note.audio
-        if anki_note.image:
-            updated_fields["image"] = anki_note.image
-        return updated_fields
-
-    def _update_anki_notes(self, anki_notes: List[AnkiNoteModel]) -> None:
+    ## update
+    def _update_anki_notes(
+        self,
+        anki_notes: List[AnkiNote],
+        reference_fields: Optional[List[str]] = ["front", "back"],
+        changing_fields: Optional[List[str]] = None,
+    ) -> None:
         updated_count = 0
 
         for anki_note in tqdm(anki_notes, desc="Updating notes"):
-            query = self._build_query(anki_note)
-            note_ids = self._fetch_note_ids(query)
+            matching_notes = self._find_notes_like(anki_note, reference_fields)
 
-            if note_ids:
-                note_id = note_ids[0]
-                existing_note = self._fetch_existing_note(note_id)
+            if matching_notes:
+                note_id = matching_notes[0]
+                existing_note = self._get_note(note_id)
 
-                changes = self._check_for_changes(anki_note, existing_note)
-
-                if changes or anki_note.do_write:
-                    updated_fields = self._prepare_updated_fields(
-                        anki_note, existing_note
-                    )
-                    updated_note = {"id": note_id, "fields": updated_fields}
-                    self.anki_connection("updateNoteFields", note=updated_note)
+                if self._update_note(
+                    new_note=anki_note,
+                    existing_note=existing_note,
+                    changing_fields=changing_fields,
+                ):
                     updated_count += 1
 
         logger.info(f"{updated_count} notes updated")
+
+    def _update_note(
+        self,
+        new_note: AnkiNote,
+        existing_note: AnkiNote,
+        changing_fields: Optional[List[str]] = None,
+    ) -> bool:
+        fields_to_check = (
+            changing_fields if changing_fields is not None else new_note.get_fields()
+        )
+
+        updated_fields = existing_note.get_fields()
+        changes_detected = False
+
+        for field in fields_to_check:
+            new_value = getattr(new_note, field)
+            existing_value = getattr(existing_note, field)
+
+            if new_value != existing_value:
+                updated_fields[field] = new_value
+                changes_detected = True
+
+        if changes_detected:
+            updated_note = {"id": existing_note.id, "fields": updated_fields}
+            self.anki_connection("updateNoteFields", note=updated_note)
+            return True
+
+        return False
+
+    # utils
+    def _find_notes_like(
+        self, note: AnkiNote, reference_fields: List[str] = ["front", "back"]
+    ) -> List[int]:
+        field_filter = " ".join(
+            [f"{field}:'{getattr(note, field)}'" for field in reference_fields]
+        )
+        query = f"deck:{note.deckName} {field_filter}"
+        return self.anki_connection("findNotes", query=query)
+
+    def _get_note(self, note_id: int) -> AnkiNote:
+        notes = self.anki_connection("notesInfo", notes=[note_id])
+        if not notes:
+            return None
+
+        note_info = notes[0]
+        fields = note_info["fields"]
+
+        return AnkiNote(
+            deckName=note_info["deckName"],
+            modelName=note_info["modelName"],
+            front=fields["Front"]["value"],
+            back=fields["Back"]["value"],
+            audio=fields.get("Audio", {}).get("value", None),
+            image=fields.get("Image", {}).get("value", None),
+            tags=note_info.get("tags", []),
+            id=note_id,
+        )
