@@ -63,10 +63,10 @@ jobs:
           path: report.xml
           name: pytest-report
 
-      # - name: Process test report with dorny/test-reporter
-      #   uses: dorny/test-reporter@v1
-      #   if: success() || failure()
-      #   with:
-      #     name: 'pytest report'
-      #     path: 'report.xml'
-      #     reporter: java-junit
+      - name: Process test report with dorny/test-reporter
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: 'pytest report'
+          path: 'report.xml'
+          reporter: java-junit
