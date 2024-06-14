@@ -7,35 +7,31 @@ from pydantic import BaseModel
 class AnkiNote(BaseModel):
     deckName: str
     modelName: str
+    tags: Optional[List[str]] = []
     front: str
     back: str
-    audio: Optional[str] = None
-    image: Optional[str] = None
+    audio: Optional[Dict[str, str]] = None
+    image: Optional[Dict[str, str]] = None
+    video: Optional[Dict[str, str]] = None
     do_write: Optional[bool] = False
-    tags: Optional[List[str]] = []
     id: Optional[int] = None
 
     def to_anki_dict(self) -> Dict:
         anki_note_dict = {
             "deckName": self.deckName,
             "modelName": self.modelName,
-            "fields": self.get_fields(),
-            "options": {"allowDuplicate": False},
             "tags": [],
+            "fields": {
+                "front": self.front,
+                "back": self.back,
+            },
+            "audio": self.audio,
+            "image": self.image,
+            "video": self.video,
+            "options": {"allowDuplicate": False},
         }
 
         return anki_note_dict
-
-    def get_fields(self) -> Dict:
-        fields = {"front": self.front, "back": self.back}
-
-        if self.image is not None:
-            fields.update({"image": self.image})
-
-        if self.audio is not None:
-            fields.update({"audio": self.audio})
-
-        return fields
 
 
 class NoteType(Enum):

@@ -61,6 +61,16 @@ def mock_notes_info_response(requests_mocker):
     )
 
 
+@pytest.fixture
+def mock_add_notes_response(requests_mocker):
+    requests_mocker.post(
+        "http://localhost:8765",
+        additional_matcher=lambda request: json.loads(request.text)["action"]
+        == "findNotes",
+        json={"result": [1, 2, 3], "error": None},
+    )
+
+
 class TestAnkiImporterExporter:
     def test_export_to_txt(
         self,
@@ -84,3 +94,9 @@ class TestAnkiImporterExporter:
                 "Front1\tBack1\n",
                 "Front2\tBack2\n",
             ]
+
+    def test_add_anki_notes(self):
+        pass
+
+    def test_update_anki_notes(self):
+        pass

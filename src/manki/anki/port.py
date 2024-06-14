@@ -65,7 +65,12 @@ class AnkiImporterExporter:
 
     # import
     def import_and_update_notes(
-        self, input_file: str, deck_name: str, model_name: str = "Base"
+        self,
+        input_file: str,
+        deck_name: str,
+        model_name: str = "Base",
+        reference_fields: Optional[List[str]] = ["front", "back"],
+        changing_fields: Optional[List[str]] = None,
     ) -> None:
         note_type = NoteType(model_name)
         note_fields = NoteTypeFields.get_fields(note_type)
@@ -75,7 +80,7 @@ class AnkiImporterExporter:
         else:
             raise Exception("Only .csv input files are accepted")
 
-        self.update_anki_notes(anki_notes)
+        self.update_anki_notes(anki_notes, reference_fields, changing_fields)
         self.add_anki_notes(anki_notes)
 
     ## add
@@ -105,7 +110,7 @@ class AnkiImporterExporter:
         return anki_notes
 
     ## update
-    def _update_anki_notes(
+    def update_anki_notes(
         self,
         anki_notes: List[AnkiNote],
         reference_fields: Optional[List[str]] = ["front", "back"],
@@ -135,11 +140,9 @@ class AnkiImporterExporter:
         existing_note: AnkiNote,
         changing_fields: Optional[List[str]] = None,
     ) -> bool:
-        fields_to_check = (
-            changing_fields if changing_fields is not None else new_note.get_fields()
-        )
+        fields_to_check = changing_fields if changing_fields is not None else ["fields"]
 
-        updated_fields = existing_note.get_fields()
+        updated_fields = existing_note.to_anki_dict()
         changes_detected = False
 
         for field in fields_to_check:
@@ -151,7 +154,7 @@ class AnkiImporterExporter:
                 changes_detected = True
 
         if changes_detected:
-            updated_note = {"id": existing_note.id, "fields": updated_fields}
+            updated_note = {"id": existing_note.id, **updated_fields}
             self.anki_connection("updateNoteFields", note=updated_note)
             return True
 
