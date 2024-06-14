@@ -18,11 +18,16 @@ concurrency:
   cancel-in-progress: true
       
 jobs:
-  build:
+  testing:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
+
+    env:
+      ANKI_CONNECT_URL="http://localhost:8765"
+      API_VERSION="6"
+      ANKI_API_KEY="apikey"
         
     steps:
       - uses: actions/checkout@v4
