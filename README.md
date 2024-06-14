@@ -27,6 +27,22 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
+### Set up with WSL
+To enable the connection from WSL, one needs to change the configuration of AnkiConnect as follows:
+
+```
+{
+    "apiKey": null,
+    "apiLogPath": null,
+    "ignoreOriginList": [],
+    "webBindAddress": # <-- Change this to your wsl ip (or "0.0.0.0" if you are okay with it)
+    "webBindPort": 8765,
+    "webCorsOriginList": [
+        "http://localhost"
+    ]
+}
+```
+
 ## Configuration
 Set up the necessary environment variables in a `.env` file or your environment:
 - `ANKI_CONNECT_URL`: The URL for AnkiConnect (default: `http://localhost:8765`).

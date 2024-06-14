@@ -1,10 +1,13 @@
 """
 Script to create the Anki connection.
 """
-import os
-import requests
+
 import json
+import os
+
+import requests
 from dotenv import load_dotenv
+
 from ..utils import setup_logger
 
 # Configure logging
@@ -13,7 +16,8 @@ logger = setup_logger(name=__name__)
 # Load environment variables
 load_dotenv()
 ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL")
-API_VERSION = int(os.getenv("API_VERSION", "default_version_number"))
+ANKI_API_VERSION = int(os.getenv("API_VERSION"))
+ANKI_API_KEY = os.getenv("ANKI_API_KEY")
 
 
 class AnkiConnection:
@@ -34,9 +38,12 @@ class AnkiConnection:
         invoke(action, **params): Sends a request to AnkiConnect and handles the response.
     """
 
-    def __init__(self, url=ANKI_CONNECT_URL, api_version=API_VERSION):
+    def __init__(
+        self, url=ANKI_CONNECT_URL, api_version=ANKI_API_VERSION, api_key=ANKI_API_KEY
+    ):
         self.url = url
         self.api_version = api_version
+        self.api_key = api_key
 
     def __call__(self, action, **params):
         return self.invoke(action, **params)
@@ -45,7 +52,12 @@ class AnkiConnection:
         return self.invoke("deckNames")
 
     def request(self, action, **params):
-        return {"action": action, "params": params, "version": self.api_version}
+        return {
+            "action": action,
+            "params": params,
+            "version": self.api_version,
+            "key": self.api_key,
+        }
 
     def invoke(self, action, **params):
         requestJson = json.dumps(self.request(action, **params)).encode("utf-8")
