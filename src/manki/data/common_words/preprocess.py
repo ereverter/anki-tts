@@ -1,96 +1,129 @@
-import logging
-import re
-from typing import List
+from typing import List, Optional, Tuple
 
-import fitz  # PyMuPDF
-from pydantic import BaseModel
+import fitz
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from ..domain import WordEntry, WordParser
 
 
-class WordEntry(BaseModel):
-    word: str
-    part_of_speech: List[str]
-    definitions: List[str]
-    level: str
+class OxfordCommonWordParser(WordParser):
+    def __init__(self, file_path: str):
+        self.font_mapping = {
+            "MyriadPro-Light": "metadata",
+            "UtopiaStd-Regular": "title",
+            "MyriadPro-LightIt": "pos",
+            "UtopiaStd-Italic": "comma",
+            "UtopiaStd-Bold": "level",
+            "MyriadPro-Regular": "word",
+            "UtopiaStd-Semibold": "subheading",
+        }
+
+        self.file_path = file_path
+
+    def parse_information(self) -> List[WordEntry]:
+        doc = fitz.open(self.file_path)
+        extracted_data = []
+        current_word = None
+        current_level = None
+
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            blocks = page.get_text("dict")["blocks"]
+
+            for block in blocks:
+                lines = block.get("lines", [])
+                for line in lines:
+                    spans = line["spans"]
+                    extracted_data, current_word, current_level = self._process_spans(
+                        spans, current_word, current_level, extracted_data
+                    )
+
+        if current_word:
+            extracted_data.append(current_word)
+
+        return extracted_data
+
+    def _process_spans(
+        self,
+        spans: List[dict],
+        current_word: Optional[WordEntry],
+        current_level: Optional[str],
+        extracted_data: List[WordEntry],
+    ) -> Tuple[List[WordEntry], Optional[WordEntry], Optional[str]]:
+        for span in spans:
+            text, font, element_type = self._process_span(span)
+
+            if self._is_level_indicator(text, element_type):
+                current_level = text
+                continue
+
+            if element_type == "word":
+                if current_word:
+                    extracted_data.append(current_word)
+                current_word = WordEntry(
+                    word=text, part_of_speech=[], definitions=[], level=current_level
+                )
+            elif current_word:
+                if element_type == "pos":
+                    current_word.part_of_speech.append(text)
+                elif element_type == "metadata" and "(" in text:
+                    current_word.definitions.append(text)
+                elif element_type == "explanation" and current_word.definitions:
+                    current_word.definitions[-1] += f" {text}"
+
+        return extracted_data, current_word, current_level
+
+    def _process_span(self, span: dict) -> Tuple[str, str, str]:
+        text = span["text"].strip()
+        font = span["font"]
+        element_type = self.FONT_MAPPING.get(font, "unknown")
+        return text, font, element_type
+
+    def _is_level_indicator(self, text: str, element_type: str) -> bool:
+        return element_type == "level" and text.isalnum() and len(text) == 2
 
 
-class Oxford3000Parser:
-    def __init__(self, pdf_path: str):
-        self.pdf_path = pdf_path
+def main():
+    import argparse
+    import json
+    import os
 
-    def _extract_text(self) -> List[str]:
-        document = fitz.open(self.pdf_path)
-        text = []
-        for page_num in range(document.page_count):
-            page = document.load_page(page_num)
-            text.append(page.get_text())
-        return text
+    parser = argparse.ArgumentParser(
+        description="Extract information from an Oxford CW PDF and save it as JSON."
+    )
+    parser.add_argument(
+        "--pdf_path",
+        type=str,
+        required=True,
+        help="The path to the PDF file to process.",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        required=True,
+        help="The directory to save the extracted JSON data.",
+    )
 
-    def _parse_text(self, text: List[str]) -> List[WordEntry]:
-        entries = []
-        level = None
-        word_entry_pattern = re.compile(
-            r"^([a-zA-Z1-9() ]+)\s+((?:[a-z]+\.,?\s*)+)(.*)$"
+    parser.add_argument(
+        "--file_name",
+        type=str,
+        required=True,
+        help="The file name of the JSON.",
+    )
+
+    args = parser.parse_args()
+
+    parser = OxfordCommonWordParser(file_path=args.pdf_path)
+    extracted_data = parser.parse_information()
+
+    output_path = os.path.join(args.output_dir, f"{args.file_name}.json")
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as json_file:
+        json.dump(
+            [entry.model_dump() for entry in extracted_data],
+            json_file,
+            ensure_ascii=False,
+            indent=4,
         )
-        pos_pattern = re.compile(r"([a-z]+\.,?)")
 
-        current_entry = None
-
-        for line in text:
-            line = line.strip()
-            logger.debug(f"Processing line: {line}")
-            if line in ["A1", "A2", "B1", "B2"]:
-                level = line
-                logger.info(f"Current level set to: {level}")
-            elif level:
-                match = word_entry_pattern.match(line)
-                if match:
-                    word = match.group(1).strip()
-                    pos_list = [
-                        pos.strip() for pos in pos_pattern.findall(match.group(2))
-                    ]
-                    definition = match.group(3).strip() if match.group(3) else ""
-
-                    logger.debug(
-                        f"Matched word: {word}, POS: {pos_list}, Definition: {definition}"
-                    )
-
-                    current_entry = WordEntry(
-                        word=word,
-                        part_of_speech=pos_list,
-                        definitions=[definition] if definition else [],
-                        level=level,
-                    )
-                    entries.append(current_entry)
-                else:
-                    if current_entry and current_entry.definitions:
-                        if (
-                            line.isdigit()
-                            or "©" in line
-                            or "The Oxford 3000™ by CEFR level" in line
-                        ):
-                            continue
-                        if re.match(r".+[,.;]", line):
-                            current_entry.definitions[-1] += f" {line}"
-                        else:
-                            logger.warning(f"Unhandled line: {line}")
-                    else:
-                        logger.warning(f"No match found for line: {line}")
-
-        return entries
-
-    def parse(self) -> List[WordEntry]:
-        text = self._extract_text()
-        flattened_text = "\n".join(text).split("\n")
-        return self._parse_text(flattened_text)
-
-
-if __name__ == "__main__":
-    pdf_path = "data/raw/common_words/The_Oxford_3000_by_CEFR_level.pdf"
-    parser = Oxford3000Parser(pdf_path)
-    word_entries = parser.parse()
-
-    for entry in word_entries:  # Print first 10 entries as a sample
-        print(entry.model_dump())
+    print(f"Extracted data saved to: {output_path}")
