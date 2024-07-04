@@ -1,8 +1,9 @@
 from typing import List, Optional, Tuple
 
 import fitz
+from tqdm import tqdm
 
-from ..domain import WordEntry, WordParser
+from manki.data.domain import WordEntry, WordParser
 
 
 class OxfordCommonWordParser(WordParser):
@@ -25,7 +26,7 @@ class OxfordCommonWordParser(WordParser):
         current_word = None
         current_level = None
 
-        for page_num in range(len(doc)):
+        for page_num in tqdm(range(len(doc))):
             page = doc.load_page(page_num)
             blocks = page.get_text("dict")["blocks"]
 
@@ -60,7 +61,10 @@ class OxfordCommonWordParser(WordParser):
                 if current_word:
                     extracted_data.append(current_word)
                 current_word = WordEntry(
-                    word=text, part_of_speech=[], definitions=[], level=current_level
+                    word=self._remove_numeric_elements(text),
+                    part_of_speech=[],
+                    definitions=[],
+                    level=current_level,
                 )
             elif current_word:
                 if element_type == "pos":
@@ -75,14 +79,17 @@ class OxfordCommonWordParser(WordParser):
     def _process_span(self, span: dict) -> Tuple[str, str, str]:
         text = span["text"].strip()
         font = span["font"]
-        element_type = self.FONT_MAPPING.get(font, "unknown")
+        element_type = self.font_mapping.get(font, "unknown")
         return text, font, element_type
 
     def _is_level_indicator(self, text: str, element_type: str) -> bool:
         return element_type == "level" and text.isalnum() and len(text) == 2
 
+    def _remove_numeric_elements(self, input_string: str) -> str:
+        return "".join(filter(str.isalpha, input_string))
 
-def main():
+
+if __name__ == "__main__":
     import argparse
     import json
     import os
@@ -127,3 +134,4 @@ def main():
         )
 
     print(f"Extracted data saved to: {output_path}")
+    print(f"Number of entries extracted: {len(extracted_data)}")

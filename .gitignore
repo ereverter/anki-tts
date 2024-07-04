@@ -163,3 +163,4 @@ cython_debug/
 notebooks/playground.ipynb
 data/raw/*.csv
 data/exported/*.csv
+data/processed/common_words/*.json
