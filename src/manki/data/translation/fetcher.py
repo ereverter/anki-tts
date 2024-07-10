@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import time
@@ -77,6 +78,10 @@ class URLFetcher:
                     file_path = self._store_result(url, response.text)
                     self.url_index[url] = file_path
 
+                else:
+                    print(f"Something went wrong with {url}")
+                    print(response)
+
             sleep_time = uniform(self.min_sleep, self.max_sleep)
             time.sleep(sleep_time)
 
@@ -99,28 +104,3 @@ def load_words(file_path: str) -> List[str]:
     with open(file_path, "r", encoding="utf-8") as file:
         words_data = json.load(file)
     return [entry["word"] for entry in words_data]
-
-
-def main():
-    base_url = "https://dictionary.cambridge.org/dictionary/english-catalan/"
-    words_file = "data/processed/common_words/words.json"
-    proxies = None
-    user_agents_file = "data/raw/scrapping/user_agents.json"
-    output_dir = "data/raw/dictionaries/cambridge_test"
-
-    words = load_words(words_file)
-    urls = [f"{base_url}{word}" for word in words]
-
-    with open(user_agents_file, "r", encoding="utf-8") as file:
-        user_agents = [entry["ua"] for entry in json.load(file)]
-
-    fetcher = URLFetcher(urls, proxies, user_agents, output_dir)
-    fetcher.fetch()
-
-    # Print the URL index
-    for url, path in fetcher.url_index.items():
-        print(f"{url}: {path}")
-
-
-if __name__ == "__main__":
-    main()

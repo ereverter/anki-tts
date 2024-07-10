@@ -165,3 +165,4 @@ data/raw/*.csv
 data/raw/dictionaries
 data/exported/*.csv
 data/processed/common_words/*.json
+data/processed/dictionaries/**/*.json
