@@ -162,5 +162,6 @@ cython_debug/
 # Local files
 notebooks/playground.ipynb
 data/raw/*.csv
+data/raw/dictionaries
 data/exported/*.csv
 data/processed/common_words/*.json
