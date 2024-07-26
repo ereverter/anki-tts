@@ -1,26 +1,46 @@
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import partial
 from typing import List
 
 from tqdm import tqdm
 
-from .cambdrige.parse import CambridgeDictionaryParser, CambridgeWordEntry
-from .collins.parse import CollinsDictionaryParser, CollinsWordEntry
+from manki.data.translation.cambdrige.parse import (
+    CambridgeWordEntry,
+    CatalanCambridgeDictionaryParser,
+    FrenchCambridgeDictionaryParser,
+    SpanishCambridgeDictionaryParser,
+)
+from manki.data.translation.collins.parse import (
+    CollinsDictionaryParser,
+    CollinsWordEntry,
+)
 
 
-def process_cambridge_file(file_path: str) -> List[CambridgeWordEntry]:
-    parser = CambridgeDictionaryParser(file_path)
-    return parser.parse()
+def process_cambridge_file(file_path: str, lang: str) -> List[CambridgeWordEntry]:
+    if lang == "fr":
+        parser = FrenchCambridgeDictionaryParser(file_path)
+    elif lang == "es":
+        parser = SpanishCambridgeDictionaryParser(file_path)
+    elif lang == "ca":
+        parser = CatalanCambridgeDictionaryParser(file_path)
+    else:
+        raise ValueError(f"Unsupported language: {lang}")
+
+    parsed_data = parser.parse()
+    return parsed_data
 
 
 def process_collins_file(file_path: str) -> List[CollinsWordEntry]:
     parser = CollinsDictionaryParser(file_path)
-    return parser.parse()
+    parsed_data = parser.parse()
+    return parsed_data
 
 
 def main():
-    dictionary_name = "cambridge_en_ca"
+    dictionary_name = "cambridge/en_es"
+    lang = "es"
     input_dir = f"data/raw/dictionaries/{dictionary_name}"
     output_file = f"data/processed/dictionaries/{dictionary_name}.json"
     error_file = f"data/processed/dictionaries/{dictionary_name}_errors.json"
@@ -34,8 +54,9 @@ def main():
         if file_name.endswith(".html")
     ]
 
+    process_cambridge_file_lang = partial(process_cambridge_file, lang=lang)
     process_function = (
-        process_cambridge_file
+        process_cambridge_file_lang
         if "cambridge" in dictionary_name
         else process_collins_file
     )
@@ -53,11 +74,12 @@ def main():
             file_path = future_to_file[future]
             try:
                 parsed_data = future.result()
-                all_parsed_data.extend(parsed_data)
+                if parsed_data:
+                    all_parsed_data.extend(parsed_data)
             except Exception as e:
-                print(f"Error processing {file_path}: {e}")
                 errors.append(file_path)
 
+    print(f"Total parsed entries: {len(all_parsed_data)}")
     with open(output_file, "w", encoding="utf-8") as file:
         json.dump(
             [entry.dict() for entry in all_parsed_data],

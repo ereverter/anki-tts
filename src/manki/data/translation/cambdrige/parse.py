@@ -17,7 +17,7 @@ class CambridgeWordEntry(BaseModel):
     metadata: Optional[Dict[str, str]] = None
 
 
-class CambridgeDictionaryParser:
+class FrenchCambridgeDictionaryParser:
     def __init__(self, file_path: str):
         self.file_path = file_path
 
@@ -119,5 +119,131 @@ class CambridgeDictionaryParser:
                 )
 
                 parsed_entries.append(parsed_entry)
+
+        return parsed_entries
+
+
+class CatalanCambridgeDictionaryParser:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def parse(self) -> List[CambridgeWordEntry]:
+        with open(self.file_path, "r", encoding="utf-8") as file:
+            html_content = file.read()
+
+        soup = BeautifulSoup(html_content, "html.parser")
+        entry_body = soup.find("div", class_="entry-body")
+        if not entry_body:
+            raise ValueError("The entry-body element is not found.")
+
+        entries = entry_body.find_all("div", class_="pr entry-body__el")
+        parsed_entries = []
+
+        for entry in entries:
+            word_elem = entry.find("span", class_="hw dhw")
+            word = word_elem.get_text(strip=True) if word_elem else ""
+
+            pos_section = entry.find("span", class_="pos dpos")
+            pos = pos_section.get_text(strip=True) if pos_section else ""
+
+            pronunciation_span = entry.find("span", class_="ipa dipa")
+            pronunciation = (
+                pronunciation_span.get_text(strip=True) if pronunciation_span else ""
+            )
+
+            definitions, translations = [], []
+
+            sense_blocks = entry.find_all("div", class_="def-block ddef_block")
+
+            for sense_block in sense_blocks:
+                definition_elem = sense_block.find("div", class_="def ddef_d db")
+                definition = (
+                    definition_elem.get_text(" ", strip=True) if definition_elem else ""
+                )
+
+                translation_elem = sense_block.find(
+                    "span", class_="trans dtrans dtrans-se"
+                )
+                translation = (
+                    translation_elem.get_text(strip=True) if translation_elem else ""
+                )
+
+                if definition:
+                    definitions.append(definition)
+                if translation:
+                    translations.append(translation)
+
+            parsed_entry = CambridgeWordEntry(
+                word=word,
+                part_of_speech=[pos] if pos else None,
+                pronunciation=pronunciation,
+                definitions=definitions if definitions else None,
+                translations=translations if translations else None,
+            )
+
+            parsed_entries.append(parsed_entry)
+
+        return parsed_entries
+
+
+class SpanishCambridgeDictionaryParser:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def parse(self) -> List[CambridgeWordEntry]:
+        with open(self.file_path, "r", encoding="utf-8") as file:
+            html_content = file.read()
+
+        soup = BeautifulSoup(html_content, "html.parser")
+        entry_body = soup.find("div", class_="entry-body")
+        if not entry_body:
+            raise ValueError("The entry-body element is not found.")
+
+        entries = entry_body.find_all("div", class_="pr entry-body__el")
+        parsed_entries = []
+
+        for entry in entries:
+            word_elem = entry.find("span", class_="hw dhw")
+            word = word_elem.get_text(strip=True) if word_elem else ""
+
+            pos_section = entry.find("span", class_="pos dpos")
+            pos = pos_section.get_text(strip=True) if pos_section else ""
+
+            pronunciation_span = entry.find("span", class_="ipa dipa")
+            pronunciation = (
+                pronunciation_span.get_text(strip=True) if pronunciation_span else ""
+            )
+
+            definitions, translations = [], []
+
+            sense_blocks = entry.find_all("div", class_="def-block ddef_block")
+
+            for sense_block in sense_blocks:
+                definition_elem = sense_block.find("div", class_="def ddef_d db")
+                definition = (
+                    definition_elem.get_text(" ", strip=True) if definition_elem else ""
+                )
+
+                translation_elem = sense_block.find(
+                    "span", class_="trans dtrans dtrans-se"
+                )
+                translation = (
+                    translation_elem.get_text(strip=True) if translation_elem else ""
+                )
+
+                if definition:
+                    definitions.append(definition)
+                if translation:
+                    translations.append(translation)
+
+            parsed_entry = CambridgeWordEntry(
+                word=word,
+                part_of_speech=[pos] if pos else None,
+                pronunciation=pronunciation,
+                definitions=definitions if definitions else None,
+                translations=translations if translations else None,
+            )
+
+            parsed_entries.append(parsed_entry)
 
         return parsed_entries
