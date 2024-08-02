@@ -1,5 +1,4 @@
 import json
-import os
 
 from ..fetcher import URLFetcher, load_words
 
@@ -16,7 +15,9 @@ def main():
     with open(user_agents_file, "r", encoding="utf-8") as file:
         user_agents = [entry["ua"] for entry in json.load(file)]
 
-    fetcher = URLFetcher(urls, None, user_agents, output_dir)
+    proxies = None
+
+    fetcher = URLFetcher(urls, proxies, user_agents, output_dir)
     fetcher.fetch()
 
     for url, path in fetcher.url_index.items():

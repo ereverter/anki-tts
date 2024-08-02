@@ -39,8 +39,8 @@ def process_collins_file(file_path: str) -> List[CollinsWordEntry]:
 
 
 def main():
-    dictionary_name = "cambridge/en_es"
-    lang = "es"
+    dictionary_name = "cambridge/en_ca"
+    lang = "ca"
     input_dir = f"data/raw/dictionaries/{dictionary_name}"
     output_file = f"data/processed/dictionaries/{dictionary_name}.json"
     error_file = f"data/processed/dictionaries/{dictionary_name}_errors.json"

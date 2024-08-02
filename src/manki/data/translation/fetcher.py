@@ -21,6 +21,7 @@ class URLFetcher:
         max_sleep: float = 3.0,
         create_index: bool = True,
         force_index: bool = True,
+        verify: bool = True,
     ):
         self.urls = urls
         self.proxies = cycle(proxies) if proxies else None
@@ -33,6 +34,7 @@ class URLFetcher:
         self.force_index = force_index
         self.create_index = create_index
         self.url_index: Dict[str, str] = self.load_index(self.index_path)
+        self.verify = verify
 
     def load_index(self, index_path: str) -> Dict[str, str]:
         if os.path.exists(index_path) and not self.force_index:
@@ -72,12 +74,14 @@ class URLFetcher:
                     session.proxies.update({"http": proxy, "https": proxy})
                 session.headers.update(headers)
 
-                response = session.get(url)
+                response = session.get(url, verify=self.verify)
 
                 if response.status_code == 200:
                     file_path = self._store_result(url, response.text)
                     self.url_index[url] = file_path
-
+                elif response.status_code == 429:
+                    print("Too many requests")
+                    break
                 else:
                     print(f"Something went wrong with {url}")
                     print(response)
