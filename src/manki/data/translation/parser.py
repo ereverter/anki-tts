@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,10 +12,6 @@ from manki.data.translation.cambdrige.parse import (
     CatalanCambridgeDictionaryParser,
     FrenchCambridgeDictionaryParser,
     SpanishCambridgeDictionaryParser,
-)
-from manki.data.translation.collins.parse import (
-    CollinsDictionaryParser,
-    CollinsWordEntry,
 )
 
 
@@ -32,19 +29,9 @@ def process_cambridge_file(file_path: str, lang: str) -> List[CambridgeWordEntry
     return parsed_data
 
 
-def process_collins_file(file_path: str) -> List[CollinsWordEntry]:
-    parser = CollinsDictionaryParser(file_path)
-    parsed_data = parser.parse()
-    return parsed_data
-
-
-def main():
-    dictionary_name = "cambridge/en_ca"
-    lang = "ca"
-    input_dir = f"data/raw/dictionaries/{dictionary_name}"
-    output_file = f"data/processed/dictionaries/{dictionary_name}.json"
-    error_file = f"data/processed/dictionaries/{dictionary_name}_errors.json"
-
+def main(
+    dictionary_name: str, lang: str, input_dir: str, output_file: str, error_file: str
+):
     all_parsed_data = []
     errors = []
 
@@ -54,12 +41,7 @@ def main():
         if file_name.endswith(".html")
     ]
 
-    process_cambridge_file_lang = partial(process_cambridge_file, lang=lang)
-    process_function = (
-        process_cambridge_file_lang
-        if "cambridge" in dictionary_name
-        else process_collins_file
-    )
+    process_function = partial(process_cambridge_file, lang=lang)
 
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         future_to_file = {
@@ -93,4 +75,31 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Process Cambridge Dictionary files")
+    parser.add_argument(
+        "--dictionary_name", type=str, required=True, help="Name of the dictionary"
+    )
+    parser.add_argument(
+        "--lang",
+        type=str,
+        required=True,
+        help="Language of the dictionary (fr, es, ca)",
+    )
+    parser.add_argument(
+        "--input_dir", type=str, required=True, help="Directory with input HTML files"
+    )
+    parser.add_argument(
+        "--output_file", type=str, required=True, help="Path to the output JSON file"
+    )
+    parser.add_argument(
+        "--error_file", type=str, required=True, help="Path to the error JSON file"
+    )
+
+    args = parser.parse_args()
+    main(
+        args.dictionary_name,
+        args.lang,
+        args.input_dir,
+        args.output_file,
+        args.error_file,
+    )

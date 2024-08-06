@@ -1,11 +1,13 @@
 import argparse
 import json
 import os
+import random
 import time
 from itertools import cycle
 from random import uniform
 from typing import Dict, List, Optional
 
+import numpy as np
 from requests.sessions import Session
 from tqdm import tqdm
 
@@ -16,19 +18,19 @@ class URLFetcher:
         urls: List[str],
         proxies: Optional[List[str]] = None,
         user_agents: List[str] = None,
-        output_dir: str = "scrapping",
-        min_sleep: float = 1.0,
-        max_sleep: float = 3.0,
+        output_dir: str = "scraping",
+        mean_sleep: float = 20.0,
+        noise_stddev: float = 5.0,
         create_index: bool = True,
         force_index: bool = True,
-        verify: bool = True,
+        verify: Optional[str] = None,
     ):
         self.urls = urls
         self.proxies = cycle(proxies) if proxies else None
         self.user_agents = cycle(user_agents) if user_agents else None
         self.output_dir = output_dir
-        self.min_sleep = min_sleep
-        self.max_sleep = max_sleep
+        self.mean_sleep = mean_sleep
+        self.noise_stddev = noise_stddev
         os.makedirs(output_dir, exist_ok=True)
         self.index_path = os.path.join(output_dir, "index.json")
         self.force_index = force_index
@@ -82,11 +84,14 @@ class URLFetcher:
                 elif response.status_code == 429:
                     print("Too many requests")
                     break
+                elif response.status_code == 500:
+                    print("Internal server error")
+                    break
                 else:
                     print(f"Something went wrong with {url}")
                     print(response)
 
-            sleep_time = uniform(self.min_sleep, self.max_sleep)
+            sleep_time = get_sleep_time(self.mean_sleep, self.noise_stddev)
             time.sleep(sleep_time)
 
         if self.create_index:
@@ -108,3 +113,15 @@ def load_words(file_path: str) -> List[str]:
     with open(file_path, "r", encoding="utf-8") as file:
         words_data = json.load(file)
     return [entry["word"] for entry in words_data]
+
+
+def get_sleep_time(mean_sleep: float, stddev_sleep: float, min_sleep: float = 5.0):
+    sleep_time = np.random.normal(mean_sleep, stddev_sleep)
+    if np.random.random() < 0.1:
+        long_pause = np.random.normal(2 * mean_sleep, stddev_sleep)
+        sleep_time += long_pause
+
+    if sleep_time <= min_sleep:
+        sleep_time = get_sleep_time(mean_sleep, stddev_sleep, min_sleep)
+
+    return sleep_time
