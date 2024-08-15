@@ -1,30 +1,47 @@
 import json
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
 
-class CollinsWordEntry(BaseModel):
+class WordEntry(BaseModel):
     word: str
-    part_of_speech: Optional[List[str]] = None
+    part_of_speech: List[str]
     pronunciation: Optional[str] = None
-    definitions: Optional[List[str]] = None
-    translations: Optional[List[str]] = None
+    definitions: List[str]
+    translations: List[str]
     examples: Optional[List[str]] = None
-    synonyms: Optional[List[str]] = None
-    antonyms: Optional[List[str]] = None
-    metadata: Optional[Dict[str, str]] = None
 
 
-class CollinsDictionaryParser:
-    def __init__(self, file_path: str):
-        self.file_path = file_path
+class SimpleWordParser:
+    def __init__(self, html_file_path: str):
+        with open(html_file_path, "r", encoding="utf-8") as file:
+            soup = BeautifulSoup(file, "html.parser")
+            self.data = json.loads(soup.get_text(strip=True))
 
-    def parse(self) -> List[CollinsWordEntry]:
-        with open(self.file_path, "r", encoding="utf-8") as file:
-            html_content = file.read()
+    def parse(self) -> List[WordEntry]:
+        word_entries = []
 
-        # Implement the actual parsing logic for Collins dictionary here
-        # For now, return an empty list
-        return []
+        for entry in self.data:
+            word = entry.get("text")
+            part_of_speech = [entry.get("pos")]
+
+            translations = [t.get("text") for t in entry.get("translations", [])]
+            definitions = translations  # Treating translations as definitions
+
+            examples = []
+            for translation in entry.get("translations", []):
+                for example in translation.get("examples", []):
+                    examples.append(f"{example.get('src')} -> {example.get('dst')}")
+
+            word_entry = WordEntry(
+                word=word,
+                part_of_speech=part_of_speech,
+                definitions=definitions,
+                translations=translations,
+                examples=examples if examples else None,
+            )
+            word_entries.append(word_entry)
+
+        return word_entries

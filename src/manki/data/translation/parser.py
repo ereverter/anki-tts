@@ -13,17 +13,26 @@ from manki.data.translation.cambdrige.parse import (
     FrenchCambridgeDictionaryParser,
     SpanishCambridgeDictionaryParser,
 )
+from manki.data.translation.diccionari_cat.parse import CatalanDictionaryParser
+from manki.data.translation.linguee.parse import SimpleWordParser as LingueeParser
 
 
-def process_cambridge_file(file_path: str, lang: str) -> List[CambridgeWordEntry]:
-    if lang == "fr":
-        parser = FrenchCambridgeDictionaryParser(file_path)
-    elif lang == "es":
-        parser = SpanishCambridgeDictionaryParser(file_path)
-    elif lang == "ca":
-        parser = CatalanCambridgeDictionaryParser(file_path)
+def process_file(file_path: str, dictionary_name: str, lang: str):
+    if dictionary_name == "cambridge":
+        if lang == "fr":
+            parser = FrenchCambridgeDictionaryParser(file_path)
+        elif lang == "es":
+            parser = SpanishCambridgeDictionaryParser(file_path)
+        elif lang == "ca":
+            parser = CatalanCambridgeDictionaryParser(file_path)
+        else:
+            raise ValueError(f"Unsupported language: {lang}")
+    elif dictionary_name == "diccionari_cat":
+        parser = CatalanDictionaryParser(file_path)
+    elif dictionary_name == "linguee":
+        parser = LingueeParser(file_path)
     else:
-        raise ValueError(f"Unsupported language: {lang}")
+        raise ValueError(f"Unsupported dictionary: {dictionary_name}")
 
     parsed_data = parser.parse()
     return parsed_data
@@ -41,7 +50,7 @@ def main(
         if file_name.endswith(".html")
     ]
 
-    process_function = partial(process_cambridge_file, lang=lang)
+    process_function = partial(process_file, dictionary_name=dictionary_name, lang=lang)
 
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         future_to_file = {
@@ -75,9 +84,12 @@ def main(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process Cambridge Dictionary files")
+    parser = argparse.ArgumentParser(description="Process dictionary files")
     parser.add_argument(
-        "--dictionary_name", type=str, required=True, help="Name of the dictionary"
+        "--dictionary_name",
+        type=str,
+        required=True,
+        help="Name of the dictionary (cambridge, diccionari_cat, linguee)",
     )
     parser.add_argument(
         "--lang",
