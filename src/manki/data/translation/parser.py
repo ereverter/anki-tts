@@ -1,3 +1,7 @@
+"""
+Parses HTML files from Cambridge, Diccionari.cat and Linguee dictionaries.
+"""
+
 import argparse
 import json
 import os

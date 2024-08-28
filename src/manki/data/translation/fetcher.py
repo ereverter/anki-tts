@@ -1,3 +1,7 @@
+"""
+Fetches HTML content from a list of URLs and stores it in a directory.
+"""
+
 import argparse
 import json
 import os
