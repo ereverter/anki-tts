@@ -1,10 +1,11 @@
-import argparse
+"""
+Fetches HTML content from a list of URLs and stores it in a directory.
+"""
+
 import json
 import os
-import random
 import time
 from itertools import cycle
-from random import uniform
 from typing import Dict, List, Optional
 
 import numpy as np

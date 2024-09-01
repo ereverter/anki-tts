@@ -1,9 +1,12 @@
+"""
+Parses HTML files from Cambridge, Diccionari.cat and Linguee dictionaries.
+"""
+
 import argparse
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
-from typing import List
 
 from tqdm import tqdm
 
