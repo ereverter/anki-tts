@@ -7,7 +7,6 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
-from typing import List
 
 from tqdm import tqdm
 

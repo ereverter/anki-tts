@@ -1,12 +1,18 @@
 from typing import List, Optional, Tuple
 
 import fitz
+from pydantic import BaseModel
 from tqdm import tqdm
 
-from manki.data.domain import WordEntry, WordParser
+
+class WordEntry(BaseModel):
+    word: str
+    part_of_speech: Optional[List[str]] = None
+    definitions: Optional[List[str]] = None
+    level: Optional[str] = None
 
 
-class OxfordCommonWordParser(WordParser):
+class OxfordCommonWordParser:
     def __init__(self, file_path: str):
         self.font_mapping = {
             "MyriadPro-Light": "metadata",

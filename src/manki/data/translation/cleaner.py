@@ -8,8 +8,6 @@ import os
 from collections import defaultdict
 from typing import Dict, List
 
-from tqdm import tqdm
-
 
 def process_common_words(directory: str) -> List[str]:
     words_set = set()
