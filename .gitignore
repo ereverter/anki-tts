@@ -163,3 +163,5 @@ cython_debug/
 notebooks/playground.ipynb
 /data
 *.crt
+!/data/curated/words/words.json
+!/data/curated/words/translations.json
