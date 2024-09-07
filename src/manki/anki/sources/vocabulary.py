@@ -39,8 +39,8 @@ class VocabularyAnkiFileParser(AnkiFileParser):
                 translations = definition["translations"]
 
                 if source_lang in translations and target_lang in translations:
-                    source_word = translations[source_lang]
-                    target_word = translations[target_lang]
+                    source_word = translations.get(source_lang, None) or word
+                    target_word = translations.get(target_lang, None) or word
 
                     front = f"{source_word} ({part_of_speech})"
                     back = f"{target_word}"
