@@ -72,6 +72,7 @@ class AnkiImporterExporter:
         model_name: str = "basic",
         reference_fields: Optional[List[str]] = ["front", "back"],
         changing_fields: Optional[List[str]] = None,
+        allow_duplicates: bool = False,
     ) -> None:
         self._if_not_exists_create_deck(deck_name)
 
@@ -86,11 +87,13 @@ class AnkiImporterExporter:
         new_notes = self.update_anki_notes(
             anki_notes, reference_fields, changing_fields
         )
-        self.add_anki_notes(new_notes)
+        self.add_anki_notes(new_notes, allow_duplicates)
 
     ## add
-    def add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
-        anki_notes_dict = [note.to_anki_dict() for note in anki_notes]
+    def add_anki_notes(
+        self, anki_notes: List[AnkiNote], allow_duplicates: bool = False
+    ) -> None:
+        anki_notes_dict = [note.to_anki_dict(allow_duplicates) for note in anki_notes]
         self.anki_connection("addNotes", notes=anki_notes_dict)
         logger.info(f"{len(anki_notes_dict)} new notes added")
 

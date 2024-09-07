@@ -1,4 +1,5 @@
 import argparse
+import random
 from pathlib import Path
 
 from manki.anki.connection import AnkiConnection
@@ -35,7 +36,7 @@ def parse_args():
         default="basic",
     )
     parser.add_argument(
-        "--reference_fields",
+        "--reference-fields",
         nargs="+",
         help="Fields to use as reference.",
         default=["front", "back"],
@@ -95,6 +96,7 @@ def main():
         raise ValueError("The provided path is neither a file nor a directory.")
 
     print(f"Updating and adding notes in deck '{deck_name}'...")
+    random.shuffle(anki_notes)
     importer_exporter.import_and_update_notes(
         input_file="",
         anki_notes=anki_notes,
@@ -102,6 +104,7 @@ def main():
         model_name=model_name,
         reference_fields=reference_fields,
         changing_fields=changing_fields,
+        allow_duplicates=False,
     )
 
 

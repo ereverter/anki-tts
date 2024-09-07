@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from typing import Dict, List
 
 from manki.anki.domain import AnkiNote
@@ -32,6 +33,7 @@ class VocabularyAnkiFileParser(AnkiFileParser):
         self, data: Dict[str, List[Dict]], source_lang: str, target_lang: str
     ) -> List[AnkiNote]:
         notes = []
+        source_word_occurrences = self._track_source_word_occurrences(data, source_lang)
 
         for word, definitions in data.items():
             for definition in definitions:
@@ -41,6 +43,13 @@ class VocabularyAnkiFileParser(AnkiFileParser):
                 if source_lang in translations and target_lang in translations:
                     source_word = translations.get(source_lang, None) or word
                     target_word = translations.get(target_lang, None) or word
+
+                    source_word = self._disambiguate_source_word(
+                        source_word,
+                        part_of_speech,
+                        word,
+                        source_word_occurrences,
+                    )
 
                     front = f"{source_word} ({part_of_speech})"
                     back = f"{target_word}"
@@ -60,3 +69,31 @@ class VocabularyAnkiFileParser(AnkiFileParser):
             back=back,
             tags=tags,
         )
+
+    def _track_source_word_occurrences(
+        self, data: Dict[str, List[Dict]], source_lang: str
+    ) -> Dict[str, List[Dict[str, str]]]:
+        occurrences = defaultdict(list)
+
+        for word, definitions in data.items():
+            for definition in definitions:
+                part_of_speech = definition["part_of_speech"]
+                translations = definition["translations"]
+
+                source_word = translations.get(source_lang, None) or word
+                occurrences[(source_word, part_of_speech)].append(word)
+
+        return occurrences
+
+    def _disambiguate_source_word(
+        self,
+        source_word: str,
+        part_of_speech: str,
+        english_word: str,
+        source_word_occurrences: Dict[str, List[Dict[str, str]]],
+    ) -> str:
+        key = (source_word, part_of_speech)
+        if len(source_word_occurrences[key]) > 1:
+            source_word = f"{source_word} [{english_word}]"
+
+        return source_word

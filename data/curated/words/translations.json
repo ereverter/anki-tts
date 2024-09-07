@@ -745,14 +745,6 @@
                 "es": "banco",
                 "fr": "banque"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "banc",
-                "es": "banco",
-                "fr": "banque"
-            }
         }
     ],
     "bath": [
@@ -776,14 +768,6 @@
         }
     ],
     "be": [
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "\u00e9sser",
-                "es": "ser",
-                "fr": "\u00eatre"
-            }
-        },
         {
             "part_of_speech": "verb",
             "translations": {
@@ -1008,14 +992,6 @@
         }
     ],
     "between": [
-        {
-            "part_of_speech": "preposition",
-            "translations": {
-                "ca": "entre",
-                "es": "entre",
-                "fr": "entre"
-            }
-        },
         {
             "part_of_speech": "preposition",
             "translations": {
@@ -1427,14 +1403,6 @@
                 "es": "pero",
                 "fr": "mais"
             }
-        },
-        {
-            "part_of_speech": "conjunction",
-            "translations": {
-                "ca": "per\u00f2",
-                "es": "pero",
-                "fr": "mais"
-            }
         }
     ],
     "butter": [
@@ -1548,14 +1516,6 @@
                 "ca": "llauna",
                 "es": "lata",
                 "fr": "canette"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "poder",
-                "es": "poder",
-                "fr": "pouvoir"
             }
         }
     ],
@@ -1908,14 +1868,6 @@
                 "ca": "escalada",
                 "es": "subida",
                 "fr": "escalade"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "pujar",
-                "es": "escalar",
-                "fr": "escalader"
             }
         }
     ],
@@ -2335,14 +2287,6 @@
                 "es": "corte",
                 "fr": "coupe"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "tallar",
-                "es": "cortar",
-                "fr": "couper"
-            }
         }
     ],
     "dad": [
@@ -2426,14 +2370,6 @@
                 "ca": "la foscor",
                 "es": "la oscuridad",
                 "fr": "l\u2019obscurit\u00e9"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "fosc",
-                "es": "oscuro",
-                "fr": "sombre"
             }
         }
     ],
@@ -3685,14 +3621,6 @@
                 "es": "final",
                 "fr": "finale"
             }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "final",
-                "es": "final",
-                "fr": "dernier"
-            }
         }
     ],
     "find": [
@@ -3790,14 +3718,6 @@
                 "ca": "el primer",
                 "es": "primero",
                 "fr": "premi\u00e8re"
-            }
-        },
-        {
-            "part_of_speech": "adverb",
-            "translations": {
-                "ca": "primer",
-                "es": "en primer lugar",
-                "fr": "d'abord"
             }
         }
     ],
@@ -4267,14 +4187,6 @@
                 "es": "intento",
                 "fr": "tour"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "anar",
-                "es": "ir",
-                "fr": "aller"
-            }
         }
     ],
     "good": [
@@ -4576,14 +4488,6 @@
         }
     ],
     "have": [
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "tenir",
-                "es": "tener",
-                "fr": "avoir"
-            }
-        },
         {
             "part_of_speech": "verb",
             "translations": {
@@ -5117,14 +5021,6 @@
                 "es": "informaci\u00f3n",
                 "fr": "renseignement"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "informaci\u00f3",
-                "es": "informaci\u00f3n",
-                "fr": "renseignement"
-            }
         }
     ],
     "interest": [
@@ -5224,14 +5120,6 @@
         }
     ],
     "it": [
-        {
-            "part_of_speech": "pronoun",
-            "translations": {
-                "ca": "s'ha esmentat",
-                "es": "eso",
-                "fr": "il"
-            }
-        },
         {
             "part_of_speech": "pronoun",
             "translations": {
@@ -5691,14 +5579,6 @@
             }
         },
         {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "jeure",
-                "es": "mentir",
-                "fr": "mentir"
-            }
-        },
-        {
             "part_of_speech": "noun",
             "translations": {
                 "ca": "mentida",
@@ -5740,14 +5620,6 @@
                 "ca": "encendre",
                 "es": "encender",
                 "fr": "\u00e9clairer"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "clar",
-                "es": "ligero",
-                "fr": "clair"
             }
         }
     ],
@@ -6056,14 +5928,6 @@
                 "ca": "marca",
                 "es": "marca",
                 "fr": "marque"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "fer",
-                "es": "hacer",
-                "fr": "faire"
             }
         }
     ],
@@ -6382,14 +6246,6 @@
                 "ca": "entendre malament",
                 "es": "entender mal",
                 "fr": "confondre"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "error",
-                "es": "equivocaci\u00f3n",
-                "fr": "erreur"
             }
         }
     ],
@@ -6721,22 +6577,6 @@
                 "es": "necesidades",
                 "fr": "besoin"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "necessitar",
-                "es": "necesitar",
-                "fr": "avoir besoin"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "necessitar",
-                "es": "necesitar",
-                "fr": "avoir besoin"
-            }
         }
     ],
     "negative": [
@@ -6829,14 +6669,6 @@
             "translations": {
                 "ca": "el seg\u00fcent",
                 "es": "siguiente",
-                "fr": "prochain"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "pr\u00f2xim",
-                "es": "pr\u00f3ximo",
                 "fr": "prochain"
             }
         }
@@ -8307,14 +8139,6 @@
             }
         },
         {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "programa",
-                "es": "programa",
-                "fr": "programme"
-            }
-        },
-        {
             "part_of_speech": "verb",
             "translations": {
                 "ca": "programar",
@@ -8801,14 +8625,6 @@
                 "es": "carrera",
                 "fr": "course"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "c\u00f3rrer",
-                "es": "correr",
-                "fr": "courir"
-            }
         }
     ],
     "sad": [
@@ -8952,14 +8768,6 @@
                 "ca": "segon",
                 "es": "segundo",
                 "fr": "deuxi\u00e8me"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "segon",
-                "es": "segundo",
-                "fr": "seconde"
             }
         },
         {
@@ -9777,14 +9585,6 @@
                 "es": "estancia",
                 "fr": "s\u00e9jour"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "quedar-se",
-                "es": "quedarse",
-                "fr": "rester"
-            }
         }
     ],
     "still": [
@@ -10407,14 +10207,6 @@
                 "es": "tercer",
                 "fr": "tiers"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "ter\u00e7",
-                "es": "tercer",
-                "fr": "tiers"
-            }
         }
     ],
     "thirsty": [
@@ -10546,14 +10338,6 @@
                 "ca": "cronometrar",
                 "es": "cronometrar",
                 "fr": "chronom\u00e9trer"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "temps",
-                "es": "tiempo",
-                "fr": "temps"
             }
         }
     ],
@@ -11285,14 +11069,6 @@
                 "es": "calentar",
                 "fr": "r\u00e9chauffer"
             }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "c\u00e0lid",
-                "es": "c\u00e1lido",
-                "fr": "chaud"
-            }
         }
     ],
     "wash": [
@@ -11693,14 +11469,6 @@
                 "es": "victoria",
                 "fr": "victoire"
             }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "guanyar",
-                "es": "ganar",
-                "fr": "gagner"
-            }
         }
     ],
     "window": [
@@ -11978,14 +11746,6 @@
                 "ca": "els joves",
                 "es": "los j\u00f3venes",
                 "fr": "les jeunes"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "jove",
-                "es": "joven",
-                "fr": "jeune"
             }
         }
     ],
@@ -14315,14 +14075,6 @@
                 "es": "desertar",
                 "fr": "d\u00e9serter"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "desert",
-                "es": "desierto",
-                "fr": "d\u00e9sert"
-            }
         }
     ],
     "designer": [
@@ -15193,14 +14945,6 @@
                 "es": "extremo",
                 "fr": "extr\u00eame"
             }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "extrem",
-                "es": "extremo",
-                "fr": "extr\u00eame"
-            }
         }
     ],
     "extremely": [
@@ -15290,14 +15034,6 @@
                 "ca": "por",
                 "es": "miedo",
                 "fr": "peur"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "t\u00e9mer",
-                "es": "temer",
-                "fr": "craindre"
             }
         },
         {
@@ -16152,14 +15888,6 @@
                 "ca": "dany",
                 "es": "dolor",
                 "fr": "souffrance"
-            }
-        },
-        {
-            "part_of_speech": "verb",
-            "translations": {
-                "ca": "ferir",
-                "es": "herir",
-                "fr": "blesser"
             }
         }
     ],
@@ -18785,14 +18513,6 @@
                 "es": "correr",
                 "fr": "courir"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "cursa",
-                "es": "carrera",
-                "fr": "course"
-            }
         }
     ],
     "railway": [
@@ -19191,14 +18911,6 @@
             }
         },
         {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "descans",
-                "es": "descanso",
-                "fr": "repos"
-            }
-        },
-        {
             "part_of_speech": "verb",
             "translations": {
                 "ca": "descansar",
@@ -19241,14 +18953,6 @@
                 "es": "sonar",
                 "fr": "sonner"
             }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "anell",
-                "es": "anillo",
-                "fr": "anneau"
-            }
         }
     ],
     "rise": [
@@ -19270,14 +18974,6 @@
         }
     ],
     "rock": [
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "roca",
-                "es": "roca",
-                "fr": "roche"
-            }
-        },
         {
             "part_of_speech": "noun",
             "translations": {
@@ -21801,14 +21497,6 @@
                 "es": "peor",
                 "fr": "plus mal"
             }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "pitjor",
-                "es": "peor",
-                "fr": "pire"
-            }
         }
     ],
     "worst": [
@@ -21834,22 +21522,6 @@
                 "ca": "pitjor",
                 "es": "peor",
                 "fr": "le plus mal"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "pitjor",
-                "es": "peor",
-                "fr": "pire"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "el pitjor",
-                "es": "el peor",
-                "fr": "le pire"
             }
         }
     ],
@@ -21926,14 +21598,6 @@
                 "ca": "acad\u00e8mic",
                 "es": "acad\u00e9mico",
                 "fr": "universitaire"
-            }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "acad\u00e8mic",
-                "es": "acad\u00e9mico",
-                "fr": "scolaire"
             }
         }
     ],
@@ -22566,14 +22230,6 @@
                 "ca": "lluitar",
                 "es": "luchar",
                 "fr": "se battre"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "batalla",
-                "es": "batalla",
-                "fr": "bataille"
             }
         }
     ],
@@ -29561,14 +29217,6 @@
                 "es": "usado",
                 "fr": "d'occasion"
             }
-        },
-        {
-            "part_of_speech": "adjective",
-            "translations": {
-                "ca": "usat",
-                "es": "usado",
-                "fr": "d'occasion"
-            }
         }
     ],
     "valuable": [
@@ -36151,15 +35799,7 @@
         {
             "part_of_speech": "noun",
             "translations": {
-                "ca": "estrip",
-                "es": "l\u00e1grima",
-                "fr": "d\u00e9chirure"
-            }
-        },
-        {
-            "part_of_speech": "noun",
-            "translations": {
-                "ca": "estrip",
+                "ca": "ll\u00e0grima",
                 "es": "l\u00e1grima",
                 "fr": "d\u00e9chirure"
             }
