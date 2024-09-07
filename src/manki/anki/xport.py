@@ -5,7 +5,8 @@ from typing import Dict, List, Optional
 
 from tqdm import tqdm
 
-from ..utils import setup_logger
+from manki.utils import normalize_text, setup_logger
+
 from .connection import AnkiConnection
 from .domain import AnkiNote, NoteType, NoteTypeFields
 
@@ -30,7 +31,7 @@ class AnkiImporterExporter:
         update_anki_notes(anki_notes, reference_fields, changing_fields): Update existing flashcards in Anki.
     """
 
-    def __init__(self, anki_connection: AnkiConnection = None) -> None:
+    def __init__(self, anki_connection: Optional[AnkiConnection] = None) -> None:
         if anki_connection is None:
             self.anki_connection = AnkiConnection()
         else:
@@ -177,9 +178,12 @@ class AnkiImporterExporter:
     def _find_notes_like(
         self, note: AnkiNote, reference_fields: List[str] = ["front", "back"]
     ) -> List[int]:
-        field_filter = " ".join(
-            [f'{field}:"{getattr(note, field)}"' for field in reference_fields]
-        )
+        filters = []
+        for field in reference_fields:
+            field_value = normalize_text(getattr(note, field)).replace("\\", "\\\\")
+            filters.append(f'{field}:"{field_value}"')
+
+        field_filter = " ".join(filters)
         query = f'deck:"{note.deckName}" {field_filter}'
         return self.anki_connection("findNotes", query=query)
 

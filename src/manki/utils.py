@@ -1,8 +1,10 @@
 """
 Script containing the logger setup.
 """
-import os
+
 import logging
+import os
+import unicodedata
 from logging.handlers import RotatingFileHandler
 
 
@@ -38,3 +40,8 @@ def setup_logger(log_file=None, name="Logger"):
     logger.addHandler(handler)
 
     return logger
+
+
+def normalize_text(text: str) -> str:
+    normalized_text = unicodedata.normalize("NFKC", text)
+    return normalized_text.strip()
