@@ -28,7 +28,7 @@ class AnkiNote(BaseModel):
             "audio": self.audio,
             "image": self.image,
             "video": self.video,
-            "options": {"allowDuplicate": allow_duplicate},
+            "options": {"allowDuplicate": allow_duplicate, "duplicateScope": "deck"},
         }
 
         return anki_note_dict

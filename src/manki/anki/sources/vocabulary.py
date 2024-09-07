@@ -40,24 +40,21 @@ class VocabularyAnkiFileParser(AnkiFileParser):
                 part_of_speech = definition["part_of_speech"]
                 translations = definition["translations"]
 
-                if source_lang in translations and target_lang in translations:
-                    source_word = translations.get(source_lang, None) or word
-                    target_word = translations.get(target_lang, None) or word
+                source_word = translations.get(source_lang, word)
+                target_word = translations.get(target_lang, word)
 
-                    source_word = self._disambiguate_source_word(
-                        source_word,
-                        part_of_speech,
-                        word,
-                        source_word_occurrences,
-                    )
+                source_word = self._disambiguate_source_word(
+                    source_word,
+                    part_of_speech,
+                    word,
+                    source_word_occurrences,
+                )
 
-                    front = f"{source_word} ({part_of_speech})"
-                    back = f"{target_word}"
+                front = f"{source_word} ({part_of_speech})"
+                back = f"{target_word}"
 
-                    note = self._create_anki_note(
-                        front, back, [source_lang, target_lang]
-                    )
-                    notes.append(note)
+                note = self._create_anki_note(front, back, [source_lang, target_lang])
+                notes.append(note)
 
         return notes
 
