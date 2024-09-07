@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from manki.anki.connection import AnkiConnection
 from manki.anki.domain import AnkiNote
-from manki.anki.port import AnkiImporterExporter
+from manki.anki.xport import AnkiImporterExporter
 
 
 @pytest.fixture(scope="session")

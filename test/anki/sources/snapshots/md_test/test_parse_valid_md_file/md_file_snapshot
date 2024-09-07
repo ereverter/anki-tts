@@ -1,0 +1,12 @@
+[
+    {
+        "deckName": "Default",
+        "modelName": "Basic",
+        "front": "This is the front.",
+        "back": "This is the back.",
+        "tags": [
+            "label1",
+            "label2"
+        ]
+    }
+]

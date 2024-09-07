@@ -1,0 +1,30 @@
+{
+    "one": [
+        {
+            "part_of_speech": "determiner",
+            "translations": {
+                "ca": "un",
+                "es": "uno",
+                "fr": "un"
+            }
+        },
+        {
+            "part_of_speech": "pronoun",
+            "translations": {
+                "ca": "un",
+                "es": "uno",
+                "fr": "on"
+            }
+        }
+    ],
+    "two": [
+        {
+            "part_of_speech": "noun",
+            "translations": {
+                "ca": "dos",
+                "es": "dos",
+                "fr": "deux"
+            }
+        }
+    ]
+}

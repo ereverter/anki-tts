@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from manki.anki.port import AnkiConnection
+from manki.anki.xport import AnkiConnection
 
 
 @pytest.fixture(scope="session")
