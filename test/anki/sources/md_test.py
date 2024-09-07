@@ -39,7 +39,7 @@ class TestMarkdownAnkiFileParser:
 
     def test_malformed_md_file(self, parser, samples_path, snapshot):
         # arrange
-        malformed_file = Path(samples_path) / "malformed.md"
+        malformed_file = Path(samples_path) / "malformed_md.md"
 
         # act
         result = parser.parse([str(malformed_file)])

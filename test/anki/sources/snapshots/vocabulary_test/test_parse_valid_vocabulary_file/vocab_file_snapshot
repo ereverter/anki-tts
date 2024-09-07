@@ -1,0 +1,32 @@
+[
+    {
+        "deckName": "Vocabulary",
+        "modelName": "Basic",
+        "front": "un (determiner)",
+        "back": "un",
+        "tags": [
+            "fr",
+            "ca"
+        ]
+    },
+    {
+        "deckName": "Vocabulary",
+        "modelName": "Basic",
+        "front": "on (pronoun)",
+        "back": "un",
+        "tags": [
+            "fr",
+            "ca"
+        ]
+    },
+    {
+        "deckName": "Vocabulary",
+        "modelName": "Basic",
+        "front": "deux (noun)",
+        "back": "dos",
+        "tags": [
+            "fr",
+            "ca"
+        ]
+    }
+]
