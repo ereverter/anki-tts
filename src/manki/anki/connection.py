@@ -62,7 +62,7 @@ class AnkiConnection:
     def invoke(self, action, **params):
         requestJson = json.dumps(self.request(action, **params)).encode("utf-8")
         try:
-            response = requests.post(self.url, requestJson, timeout=10).json()
+            response = requests.post(self.url, requestJson, timeout=60).json()
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
             raise

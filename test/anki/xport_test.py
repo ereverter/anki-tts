@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from manki.anki.connection import AnkiConnection
 from manki.anki.domain import AnkiNote
-from manki.anki.port import AnkiImporterExporter
+from manki.anki.xport import AnkiImporterExporter
 
 
 @pytest.fixture(scope="session")
@@ -49,8 +49,8 @@ def mock_notes_info_response(requests_mocker):
                     "modelName": "Basic",
                     "tags": ["tag1"],
                     "fields": {
-                        "Front": {"value": "front1"},
-                        "Back": {"value": "back1"},
+                        "front": {"value": "front1"},
+                        "back": {"value": "back1"},
                     },
                 },
                 {
@@ -58,8 +58,8 @@ def mock_notes_info_response(requests_mocker):
                     "modelName": "Basic",
                     "tags": ["tag1"],
                     "fields": {
-                        "Front": {"value": "front2"},
-                        "Back": {"value": "back2"},
+                        "front": {"value": "front2"},
+                        "back": {"value": "back2"},
                     },
                 },
             ],
@@ -133,12 +133,12 @@ class TestAnkiImporterExporter:
         anki_notes = self._create_anki_notes()
 
         # act
-        updated_count = anki_importer_exporter.update_anki_notes(
+        new_notes = anki_importer_exporter.update_anki_notes(
             anki_notes, reference_fields=["front"], changing_fields=["back"]
         )
 
         # assert
-        assert updated_count == 1
+        assert new_notes == []
 
     def _create_anki_notes(self):
         return [

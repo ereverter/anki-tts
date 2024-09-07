@@ -16,7 +16,7 @@ class AnkiNote(BaseModel):
     do_write: Optional[bool] = False
     id: Optional[int] = None
 
-    def to_anki_dict(self) -> Dict:
+    def to_anki_dict(self, allow_duplicate: bool = False) -> Dict:
         anki_note_dict = {
             "deckName": self.deckName,
             "modelName": self.modelName,
@@ -28,7 +28,7 @@ class AnkiNote(BaseModel):
             "audio": self.audio,
             "image": self.image,
             "video": self.video,
-            "options": {"allowDuplicate": False},
+            "options": {"allowDuplicate": allow_duplicate, "duplicateScope": "deck"},
         }
 
         return anki_note_dict

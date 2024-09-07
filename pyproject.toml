@@ -18,6 +18,7 @@ tqdm = "^4.66.4"
 pydantic = "^2.7.4"
 pymupdf = "^1.24.7"
 tiktoken = "^0.7.0"
+pytest-snapshot = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3"
@@ -34,3 +35,6 @@ expects = "^0.9.0"
 
 [tool.pytest.ini_options]
 testpaths = ["./tests"]
+
+[tool.poetry.scripts]
+manki = "manki.main:main"
