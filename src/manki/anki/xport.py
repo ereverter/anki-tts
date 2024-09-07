@@ -51,9 +51,7 @@ class AnkiImporterExporter:
             raise Exception("Can only export to .txt")
 
         with open(output_file, "w", encoding="utf-8") as file:
-            print(notes)
             for note in tqdm(notes, total=len(notes), desc="Exporting notes"):
-                print("Notes", notes)
                 fields = note["fields"]
                 line_elements = [fields[field]["value"] for field in fields]
                 line = "\t".join(line_elements) + "\n"
@@ -69,21 +67,26 @@ class AnkiImporterExporter:
     def import_and_update_notes(
         self,
         input_file: str,
+        anki_notes: Optional[List[AnkiNote]],
         deck_name: str,
-        model_name: str = "Base",
+        model_name: str = "basic",
         reference_fields: Optional[List[str]] = ["front", "back"],
         changing_fields: Optional[List[str]] = None,
     ) -> None:
+        self._if_not_exists_create_deck(deck_name)
+
         note_type = NoteType(model_name)
         note_fields = NoteTypeFields.get_fields(note_type)
 
         if input_file.endswith(".csv"):
             anki_notes = self._get_anki_notes_from_csv(input_file, deck_name, note_type)
-        else:
-            raise Exception("Only .csv input files are accepted")
+        elif not anki_notes:
+            raise Exception("Only .csv files or AnkiNotes objects are supported.")
 
-        self.update_anki_notes(anki_notes, reference_fields, changing_fields)
-        self.add_anki_notes(anki_notes)
+        new_notes = self.update_anki_notes(
+            anki_notes, reference_fields, changing_fields
+        )
+        self.add_anki_notes(new_notes)
 
     ## add
     def add_anki_notes(self, anki_notes: List[AnkiNote]) -> None:
@@ -117,13 +120,13 @@ class AnkiImporterExporter:
         anki_notes: List[AnkiNote],
         reference_fields: Optional[List[str]] = ["front", "back"],
         changing_fields: Optional[List[str]] = None,
-    ) -> None:
+    ) -> List[AnkiNote]:
         updated_count = 0
         deck_name = anki_notes[0].deckName
 
+        new_notes = []
         for anki_note in tqdm(anki_notes, desc="Updating notes"):
             matching_notes = self._find_notes_like(anki_note, reference_fields)
-
             if matching_notes:
                 note_id = matching_notes[0]
                 existing_note = self._get_note(note_id, deck_name)
@@ -135,8 +138,11 @@ class AnkiImporterExporter:
                 ):
                     updated_count += 1
 
+            else:
+                new_notes.append(anki_note)
+
         logger.info(f"{updated_count} notes updated")
-        return updated_count
+        return new_notes
 
     def _update_note(
         self,
@@ -144,19 +150,19 @@ class AnkiImporterExporter:
         existing_note: AnkiNote,
         changing_fields: Optional[List[str]] = None,
     ) -> bool:
-        fields_to_check = changing_fields if changing_fields is not None else ["fields"]
+        if changing_fields is None:
+            return
 
-        updated_fields = existing_note.to_anki_dict()
         changes_detected = False
-
-        for field in fields_to_check:
+        for field in changing_fields:
             new_value = getattr(new_note, field)
             existing_value = getattr(existing_note, field)
 
             if new_value != existing_value:
-                updated_fields[field] = new_value
+                setattr(existing_note, field, new_value)
                 changes_detected = True
 
+        updated_fields = existing_note.to_anki_dict()
         if changes_detected:
             updated_note = {"id": existing_note.id, **updated_fields}
             self.anki_connection("updateNoteFields", note=updated_note)
@@ -169,9 +175,9 @@ class AnkiImporterExporter:
         self, note: AnkiNote, reference_fields: List[str] = ["front", "back"]
     ) -> List[int]:
         field_filter = " ".join(
-            [f"{field}:'{getattr(note, field)}'" for field in reference_fields]
+            [f'{field}:"{getattr(note, field)}"' for field in reference_fields]
         )
-        query = f"deck:{note.deckName} {field_filter}"
+        query = f'deck:"{note.deckName}" {field_filter}'
         return self.anki_connection("findNotes", query=query)
 
     def _get_note(self, note_id: int, deck_name: str) -> AnkiNote:
@@ -184,10 +190,25 @@ class AnkiImporterExporter:
         return AnkiNote(
             deckName=deck_name,
             modelName=note_info["modelName"],
-            front=fields["Front"]["value"],
-            back=fields["Back"]["value"],
-            audio=fields.get("Audio", {}).get("value", None),
-            image=fields.get("Image", {}).get("value", None),
+            front=fields["front"]["value"],
+            back=fields["back"]["value"],
+            audio=fields.get("audio", {}).get("value", None),
+            image=fields.get("image", {}).get("value", None),
             tags=note_info.get("tags", []),
             id=note_id,
         )
+
+    def _if_not_exists_create_deck(self, deck_name: str) -> None:
+        existing_decks = self.anki_connection("deckNames")
+
+        if deck_name not in existing_decks:
+            logger.info(f"Deck '{deck_name}' does not exist. Creating it...")
+            deck_id = self.anki_connection("createDeck", deck=deck_name)
+            if deck_id:
+                logger.info(
+                    f"Deck '{deck_name}' created successfully with ID {deck_id}."
+                )
+            else:
+                raise Exception(f"Failed to create deck '{deck_name}'.")
+        else:
+            logger.info(f"Deck '{deck_name}' already exists.")

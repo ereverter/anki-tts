@@ -32,12 +32,19 @@ def parse_args():
     parser.add_argument(
         "--model-name",
         help="Name of the Anki model.",
-        default="Basic",
+        default="basic",
     )
     parser.add_argument(
-        "--no-update",
-        help=" Do not update existing cards if they already exist.",
-        action="store_false",
+        "--reference_fields",
+        nargs="+",
+        help="Fields to use as reference.",
+        default=["front", "back"],
+    )
+    parser.add_argument(
+        "--changing-fields",
+        nargs="+",
+        help="Fields to update in existing notes.",
+        default=None,
     )
     return parser.parse_args()
 
@@ -50,7 +57,8 @@ def main():
     model_name = args.model_name
     source_lang = args.source_lang
     target_lang = args.target_lang
-    update_existing = args.update
+    reference_fields = args.reference_fields
+    changing_fields = args.changing_fields
 
     anki_connection = AnkiConnection()
     importer_exporter = AnkiImporterExporter(anki_connection=anki_connection)
@@ -86,14 +94,15 @@ def main():
     else:
         raise ValueError("The provided path is neither a file nor a directory.")
 
-    if update_existing:
-        print(f"Updating existing notes in deck '{deck_name}'...")
-        importer_exporter.import_and_update_notes(
-            input_file=str(input_path), deck_name=deck_name, model_name=model_name
-        )
-    else:
-        print(f"Adding new notes to deck '{deck_name}'...")
-        importer_exporter.add_anki_notes(anki_notes)
+    print(f"Updating and adding notes in deck '{deck_name}'...")
+    importer_exporter.import_and_update_notes(
+        input_file="",
+        anki_notes=anki_notes,
+        deck_name=deck_name,
+        model_name=model_name,
+        reference_fields=reference_fields,
+        changing_fields=changing_fields,
+    )
 
 
 if __name__ == "__main__":
